@@ -95,6 +95,24 @@ const appsRoute: Routes = [
         authority: [ADMIN, USER],
     },
     {
+        key: 'appsSales.jobcardList',
+        path: `${APP_PREFIX_PATH}/sales/jobcard-list`,
+        component: lazy(() => import('@/views/sales/JobCardList/JobCardList')),
+        authority: [ADMIN, USER],
+    },
+    {
+        key: 'appsSales.jobcardNew',
+        path: `${APP_PREFIX_PATH}/sales/jobcard-new`,
+        component: lazy(() => import('@/views/sales/JobCardList/JobCardForm')),
+        authority: [ADMIN, USER],
+    },
+    {
+        key: 'appsSales.jobcardList',
+        path: `${APP_PREFIX_PATH}/sales/jobcard/:id`,
+        component: lazy(() => import('@/views/sales/JobCardList/JobCardView')),
+        authority: [ADMIN, USER],
+    },
+    {
         key: 'appsSales.productEdit',
         path: `${APP_PREFIX_PATH}/sales/product-edit/:productId`,
         component: lazy(() => import('@/views/sales/ProductEdit')),
@@ -222,6 +240,7 @@ const appsRoute: Routes = [
         component: lazy(() => import('@/views/account/KycForm')),
         authority: [ADMIN, USER],
     },
+
 ]
 
 export default appsRoute

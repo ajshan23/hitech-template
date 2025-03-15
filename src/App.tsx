@@ -10,9 +10,9 @@ import './locales'
 
 const environment = process.env.NODE_ENV
 
-if (appConfig.enableMock) {
-    mockServer({ environment })
-}
+// if (appConfig.enableMock) {
+//     mockServer({ environment })
+// }
 
 function App() {
     return (
