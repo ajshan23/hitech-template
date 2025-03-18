@@ -1,0 +1,1 @@
+function s(e){const n=["50","100","200","300","400","500","600","700","800","900"],r=n.indexOf(e==null?void 0:e.toString());function t(c){if(r===0||r===n.length-1)return e;if(c==="decrement")return n[r-1];if(c==="increment")return n[r+1]}const i=t("decrement");return[t("increment"),i]}export{s as u};
