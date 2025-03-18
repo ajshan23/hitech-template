@@ -7,11 +7,19 @@ import Loading from "@/components/shared/Loading";
 import DoubleSidedImage from "@/components/shared/DoubleSidedImage";
 import Tag from "@/components/ui/Tag";
 import Button from "@/components/ui/Button";
-import { FaTools, FaCalendarAlt, FaUser, FaCog } from "react-icons/fa";
+import { FaTools, FaCalendarAlt, FaUser, FaCog, FaPhone, FaMapMarkerAlt } from "react-icons/fa";
+import { MdOutlineDone } from "react-icons/md";
+import { GrUserWorker } from "react-icons/gr";
 import isEmpty from "lodash/isEmpty";
 import dayjs from "dayjs";
 
 const apiBaseUrl = "https://mytest.hitechengineeringcompany.in/api";
+
+interface Worker {
+  _id: string;
+  workerName: string;
+  workerImage: string;
+}
 
 interface JobCard {
   _id: string;
@@ -20,6 +28,7 @@ interface JobCard {
   phoneNumber: string;
   jobCardNumber: string;
   InDate: string;
+  OutDate?: string;
   Make: string;
   HP: number;
   KVA: number | null;
@@ -29,14 +38,17 @@ interface JobCard {
   SrNo: string;
   DealerName: string;
   DealerNumber: string;
-  warranty: boolean;
-  jobCardStatus: string;
   works: string;
   spares: string;
   industrialworks: string;
   attachments: string[];
   images: { _id: string; image: string }[];
   others: string;
+  warranty: boolean;
+  jobCardStatus: string;
+  worker: Worker;
+  invoiceNumber: string;
+  invoiceDate: string;
   createdAt: string;
   updatedAt: string;
   __v: number;
@@ -128,15 +140,15 @@ const JobCardView = () => {
                   <Button
                     variant="solid"
                     className="bg-blue-600 hover:bg-blue-700 text-white dark:bg-blue-500 dark:hover:bg-blue-600 px-4 py-2 rounded-md"
-                    onClick={() => navigate(`/admin/edit-jobcard/${id}`)}
-                    disabled={data?.jobCardStatus !== "Pending"}
+                    onClick={() => navigate(`/app/jobcards/jobcard-edit/${id}`)}
+                    // disabled={data?.jobCardStatus !== "Pending"}
                   >
                     Edit
                   </Button>
                   <Button
                     variant="default"
                     className="border-gray-300 text-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700 px-4 py-2 rounded-md"
-                    onClick={() => navigate("/admin/jobcard")}
+                    onClick={() => navigate(-1)}
                   >
                     Back
                   </Button>
@@ -146,6 +158,7 @@ const JobCardView = () => {
 
             {/* Main Content */}
             <div className="p-6 space-y-8">
+              {/* Customer Details */}
               <section className="border-b border-gray-200 dark:border-gray-700 pb-6">
                 <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4 flex items-center gap-2">
                   <FaUser className="text-blue-600 dark:text-blue-400" /> Customer Details
@@ -160,9 +173,15 @@ const JobCardView = () => {
                   <p>
                     <strong>Phone:</strong> {data?.phoneNumber || "N/A"}
                   </p>
+                  {data?.OutDate && (
+                    <p>
+                      <strong>Out Date:</strong> {dayjs(data.OutDate).format("MMM DD, YYYY")}
+                    </p>
+                  )}
                 </div>
               </section>
 
+              {/* Specifications */}
               <section className="border-b border-gray-200 dark:border-gray-700 pb-6">
                 <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4">
                   Specifications
@@ -192,38 +211,85 @@ const JobCardView = () => {
                 </div>
               </section>
 
+              {/* Dealer & Work Details */}
               <section className="border-b border-gray-200 dark:border-gray-700 pb-6">
                 <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4 flex items-center gap-2">
                   <FaCog className="text-blue-600 dark:text-blue-400" /> Dealer & Work Details
                 </h3>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    {data?.works && (
-                      <div className="bg-white dark:bg-gray-900 p-4 rounded-lg shadow-sm">
-                        <h5 className="text-sm font-semibold text-amber-600 dark:text-amber-400 mb-2">Works</h5>
-                        <p className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap">{data.works}</p>
-                      </div>
-                    )}
-                    {data?.spares && (
-                      <div className="bg-white dark:bg-gray-900 p-4 rounded-lg shadow-sm">
-                        <h5 className="text-sm font-semibold text-amber-600 dark:text-amber-400 mb-2">Spares</h5>
-                        <p className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap">{data.spares}</p>
-                      </div>
-                    )}
-                    {data?.industrialworks && (
-                      <div className="bg-white dark:bg-gray-900 p-4 rounded-lg shadow-sm">
-                        <h5 className="text-sm font-semibold text-amber-600 dark:text-amber-400 mb-2">Industrial Works</h5>
-                        <p className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap">{data.industrialworks}</p>
-                      </div>
-                    )}
-                    {data?.others && (
-                      <div className="bg-white dark:bg-gray-900 p-4 rounded-lg shadow-sm">
-                        <h5 className="text-sm font-semibold text-amber-600 dark:text-amber-400 mb-2">Others</h5>
-                        <p className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap">{data.others}</p>
-                      </div>
-                    )}
-                  </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-gray-700 dark:text-gray-300">
+                  <p>
+                    <strong>Dealer Name:</strong> {data?.DealerName || "N/A"}
+                  </p>
+                  <p>
+                    <strong>Dealer Number:</strong> {data?.DealerNumber || "N/A"}
+                  </p>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+                  {data?.works && (
+                    <div className="bg-white dark:bg-gray-900 p-4 rounded-lg shadow-sm">
+                      <h5 className="text-sm font-semibold text-amber-600 dark:text-amber-400 mb-2">Works</h5>
+                      <p className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap">{data.works}</p>
+                    </div>
+                  )}
+                  {data?.spares && (
+                    <div className="bg-white dark:bg-gray-900 p-4 rounded-lg shadow-sm">
+                      <h5 className="text-sm font-semibold text-amber-600 dark:text-amber-400 mb-2">Spares</h5>
+                      <p className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap">{data.spares}</p>
+                    </div>
+                  )}
+                  {data?.industrialworks && (
+                    <div className="bg-white dark:bg-gray-900 p-4 rounded-lg shadow-sm">
+                      <h5 className="text-sm font-semibold text-amber-600 dark:text-amber-400 mb-2">Industrial Works</h5>
+                      <p className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap">{data.industrialworks}</p>
+                    </div>
+                  )}
+                  {data?.others && (
+                    <div className="bg-white dark:bg-gray-900 p-4 rounded-lg shadow-sm">
+                      <h5 className="text-sm font-semibold text-amber-600 dark:text-amber-400 mb-2">Others</h5>
+                      <p className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap">{data.others}</p>
+                    </div>
+                  )}
+                </div>
               </section>
 
+              {/* Worker Details */}
+              {data?.worker && (
+                <section className="border-b border-gray-200 dark:border-gray-700 pb-6">
+                  <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4 flex items-center gap-2">
+                    <GrUserWorker className="text-blue-600 dark:text-blue-400" /> Worker Details
+                  </h3>
+                  <div className="grid grid-cols-2 gap-4 text-gray-700 dark:text-gray-300">
+                    <p>
+                      <strong>Worker Name:</strong> {data.worker.workerName || "N/A"}
+                    </p>
+                    <div className="flex items-center gap-2">
+                      <strong>Worker Image:</strong>
+                      <img
+                        src={data.worker.workerImage}
+                        alt="Worker"
+                        className="w-10 h-10 rounded-full"
+                      />
+                    </div>
+                  </div>
+                </section>
+              )}
+
+              {/* Invoice Details */}
+              <section className="border-b border-gray-200 dark:border-gray-700 pb-6">
+                <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4 flex items-center gap-2">
+                  <MdOutlineDone className="text-blue-600 dark:text-blue-400" /> Invoice Details
+                </h3>
+                <div className="grid grid-cols-2 gap-4 text-gray-700 dark:text-gray-300">
+                  <p>
+                    <strong>Invoice Number:</strong> {data?.invoiceNumber || "N/A"}
+                  </p>
+                  <p>
+                    <strong>Invoice Date:</strong> {data?.invoiceDate ? dayjs(data.invoiceDate).format("MMM DD, YYYY") : "N/A"}
+                  </p>
+                </div>
+              </section>
+
+              {/* Images */}
               {data?.images && data.images.length > 0 && (
                 <section className="border-b border-gray-200 dark:border-gray-700 pb-6">
                   <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4">
@@ -243,6 +309,7 @@ const JobCardView = () => {
                 </section>
               )}
 
+              {/* Status & Warranty */}
               <section>
                 <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4">
                   Status & Warranty

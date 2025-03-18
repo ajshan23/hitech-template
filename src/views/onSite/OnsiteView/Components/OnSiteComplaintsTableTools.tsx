@@ -10,16 +10,16 @@ import debounce from 'lodash/debounce';
 import LinkButton from '@/components/ui/LinkButton/LinkButton';
 
 type FilterFormModel = {
-  status: string[];
-  warranty: boolean | null;
+  complaintStatus: string[];
+  warrantyStatus: string | null;
 };
 
-const JobCardTableTools = ({
+const OnSiteComplaintsTableTools = ({
   onSearch,
   onFilter,
 }: {
   onSearch: (query: string) => void;
-  onFilter: (filters: { status?: string[]; warranty?: boolean }) => void;
+  onFilter: (filters: { warrantyStatus?: string; complaintStatus?: string[] }) => void;
 }) => {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const searchInput = useRef<HTMLInputElement>(null);
@@ -37,25 +37,22 @@ const JobCardTableTools = ({
 
   const handleFilterSubmit = (values: FilterFormModel) => {
     onFilter({
-      status: values.status.length > 0 ? values.status : undefined,
-      warranty: values.warranty ?? undefined,
+      warrantyStatus: values.warrantyStatus || undefined,
+      complaintStatus: values.complaintStatus.length > 0 ? values.complaintStatus : undefined,
     });
     closeFilterDrawer();
   };
 
   return (
     <div className="flex flex-col lg:flex-row lg:items-center gap-2">
-      {/* Search Input - Wider */}
       <Input
         ref={searchInput}
-        className="w-full md:w-96 md:mb-0 mb-4" // Increased width from md:w-80 to md:w-96 (24rem)
+        className="w-full md:w-96 md:mb-0 mb-4"
         size="sm"
-        placeholder="Search job cards..."
+        placeholder="Search complaints..."
         prefix={<HiOutlineSearch className="text-lg" />}
         onChange={handleSearch}
       />
-
-      {/* Filter Button */}
       <Button
         size="sm"
         className="block lg:inline-block md:mb-0 mb-4"
@@ -64,8 +61,6 @@ const JobCardTableTools = ({
       >
         Filter
       </Button>
-
-      {/* Export Button */}
       <Button
         block
         size="sm"
@@ -74,22 +69,18 @@ const JobCardTableTools = ({
       >
         Export
       </Button>
-
-      {/* Add Job Card Button */}
       <LinkButton
-    to="/app/jobcards/jobcard-new"
-    block
-    variant="solid"
-    size="sm"
-    icon={<HiPlusCircle />}
-    className="block lg:inline-block md:mb-0 mb-4"
->
-    Add Job Card
-</LinkButton>
-
-      {/* Filter Drawer */}
+        to="/app/onsite/form"
+        block
+        variant="solid"
+        size="sm"
+        icon={<HiPlusCircle />}
+        className="block lg:inline-block md:mb-0 mb-4"
+      >
+        Add Complaint
+      </LinkButton>
       <Drawer
-        title="Filter Job Cards"
+        title="Filter Complaints"
         isOpen={isFilterOpen}
         onClose={closeFilterDrawer}
         onRequestClose={closeFilterDrawer}
@@ -105,40 +96,39 @@ const JobCardTableTools = ({
         }
       >
         <Formik
-          initialValues={{ status: [], warranty: null }}
+          initialValues={{ complaintStatus: [], warrantyStatus: null }}
           onSubmit={handleFilterSubmit}
         >
           {({ values, setFieldValue }) => (
             <Form id="filter-form">
               <FormContainer>
                 <FormItem>
-                  <h6 className="mb-4">Job Card Status</h6>
+                  <h6 className="mb-4">Complaint Status</h6>
                   <Checkbox.Group
                     vertical
-                    value={values.status}
-                    onChange={(options) => setFieldValue('status', options)}
+                    value={values.complaintStatus}
+                    onChange={(options) => setFieldValue('complaintStatus', options)}
                   >
                     <Checkbox className="mb-3" value="Pending">
                       Pending
                     </Checkbox>
-                    <Checkbox className="mb-3" value="Completed">
-                      Completed
+                    <Checkbox className="mb-3" value="Closed">
+                      Closed
                     </Checkbox>
-                    <Checkbox className="mb-3" value="Returned">
-                      Returned
-                    </Checkbox>
-                    <Checkbox className="mb-3" value="Billed">
-                      Billed
+                    <Checkbox className="mb-3" value="Sent to Workshop">
+                      Sent to Workshop
                     </Checkbox>
                   </Checkbox.Group>
                 </FormItem>
                 <FormItem>
                   <h6 className="mb-4">Warranty Status</h6>
                   <Checkbox
-                    checked={values.warranty === true}
-                    onChange={(checked) => setFieldValue('warranty', checked ? true : null)}
+                    checked={values.warrantyStatus === 'Warranty'}
+                    onChange={(checked) =>
+                      setFieldValue('warrantyStatus', checked ? 'Warranty' : null)
+                    }
                   >
-                    Under Warranty
+                    Warranty
                   </Checkbox>
                 </FormItem>
               </FormContainer>
@@ -150,4 +140,4 @@ const JobCardTableTools = ({
   );
 };
 
-export default JobCardTableTools;
+export default OnSiteComplaintsTableTools;

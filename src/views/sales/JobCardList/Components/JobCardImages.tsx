@@ -13,16 +13,26 @@ type JobCardImagesProps = {
 const JobCardImages = (props: JobCardImagesProps) => {
     const { values } = props;
 
-    const beforeUpload = (file: File) => {
-        const isImage = file.type.startsWith('image/');
+    const beforeUpload = (file: FileList | null, fileList: File[]) => {
+        if (!file || file.length === 0) {
+            return 'Please upload an image file!';
+        }
+
+        const uploadedFile = file[0]; // Get the first file from the FileList
+
+        // Check if the file is an image
+        const isImage = uploadedFile.type.startsWith('image/');
         if (!isImage) {
             return 'Please upload an image file!';
         }
-        const isLt500KB = file.size / 1024 <= 500;
+
+        // Check if the file size is less than 500KB
+        const isLt500KB = uploadedFile.size / 1024 <= 500;
         if (!isLt500KB) {
             return 'Image size must be less than 500KB!';
         }
-        return true;
+
+        return true; // Return true if the file is valid
     };
 
     return (
@@ -34,7 +44,7 @@ const JobCardImages = (props: JobCardImagesProps) => {
                     {({ field, form }: FieldProps) => (
                         <Upload
                             draggable
-                            // beforeUpload={beforeUpload}
+                            beforeUpload={beforeUpload}
                             onChange={(files) => form.setFieldValue(field.name, files)}
                         >
                             <div className="my-16 text-center">

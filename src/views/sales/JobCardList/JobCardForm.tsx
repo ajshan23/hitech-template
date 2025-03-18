@@ -2,17 +2,16 @@ import { forwardRef, useState } from 'react';
 import { FormContainer } from '@/components/ui/Form';
 import Button from '@/components/ui/Button';
 import StickyFooter from '@/components/shared/StickyFooter';
-import ConfirmDialog from '@/components/shared/ConfirmDialog';
 import { Form, Formik, FormikProps } from 'formik';
 import * as Yup from 'yup';
 import toast from '@/components/ui/toast';
 import Notification from '@/components/ui/Notification';
 import { useNavigate } from 'react-router-dom';
-// import { apiCreateJobCard } from '@/services/JobCardService'; // Adjust the service import
-import JobCardBasicInfoFields from './Components/JobCardBasicInfoFields'; // Custom fields component
-import JobCardMachineDetailsFields from './Components/JobCardMachineDetailsFields'; // Custom fields component
-import JobCardWorkDetailsFields from './Components/JobCardWorkDetailsFields'; // Custom fields component
-import JobCardImages from './Components/JobCardImages'; // Custom images component
+import JobCardBasicInfoFields from './Components/JobCardBasicInfoFields';
+import JobCardMachineDetailsFields from './Components/JobCardMachineDetailsFields';
+import JobCardWorkDetailsFields from './Components/JobCardWorkDetailsFields';
+import JobCardImages from './Components/JobCardImages';
+import axios from 'axios';
 
 // Types
 type FormikRef = FormikProps<any>;
@@ -21,21 +20,22 @@ type InitialData = {
     customerName: string;
     customerAddress: string;
     phoneNumber: string;
-    make: string;
-    hp: string;
-    kva: string;
-    rpm: string;
-    type: string;
-    frame: string;
-    srNo: string;
-    dealerName: string;
-    dealerNumber: string;
-    works: string;
-    spares: string;
-    industrialWorks: string;
+    Make: string;
+    HP?: number;
+    KVA?: number;
+    RPM?: number;
+    Type?: string;
+    Frame: string;
+    SrNo: string;
+    DealerName?: string;
+    DealerNumber?: string;
+    works?: string;
+    spares?: string;
+    industrialworks?: string;
     attachments: string[];
-    warranty: boolean;
-    images: File[]; // Added images property
+    warranty?: boolean;
+    others?: string;
+    images: File[];
 };
 
 export type FormModel = InitialData;
@@ -53,87 +53,99 @@ const validationSchema = Yup.object().shape({
     customerName: Yup.string().required('Customer Name is required'),
     customerAddress: Yup.string().required('Customer Address is required'),
     phoneNumber: Yup.string().required('Phone Number is required'),
-    make: Yup.string().required('Make is required'),
-    hp: Yup.string().test(
-        'hp-or-kva',
-        'HP or KVA is required',
-        function (value) {
-            const { kva } = this.parent;
-            return !!value || !!kva;
-        }
-    ),
-    kva: Yup.string().test(
-        'hp-or-kva',
-        'HP or KVA is required',
-        function (value) {
-            const { hp } = this.parent;
-            return !!value || !!hp;
-        }
-    ),
-    // Other fields are optional
-    rpm: Yup.string(),
-    type: Yup.string(),
-    frame: Yup.string(),
-    srNo: Yup.string(),
-    dealerName: Yup.string(),
-    dealerNumber: Yup.string(),
-    works: Yup.string(),
-    spares: Yup.string(),
-    industrialWorks: Yup.string(),
+    Make: Yup.string().nullable(),
+    HP: Yup.number().nullable(),
+    KVA: Yup.number().nullable(),
+    RPM: Yup.number().nullable(),
+    Type: Yup.string().nullable(),
+    Frame: Yup.string().nullable(),
+    SrNo: Yup.string().nullable(),
+    DealerName: Yup.string().nullable(),
+    DealerNumber: Yup.string().nullable(),
+    works: Yup.string().nullable(),
+    spares: Yup.string().nullable(),
+    industrialworks: Yup.string().nullable(),
     attachments: Yup.array().of(Yup.string()),
     warranty: Yup.boolean(),
+    others: Yup.string().nullable(),
     images: Yup.array().of(Yup.mixed()),
 });
 
 const JobCardForm = forwardRef<FormikRef, JobCardFormProps>((props, ref) => {
-    const { type, onDiscard, onFormSubmit } = props;
+    const { type, onDiscard } = props;
     const navigate = useNavigate();
 
     const initialValues: FormModel = {
         customerName: '',
         customerAddress: '',
         phoneNumber: '',
-        make: '',
-        hp: '',
-        kva: '',
-        rpm: '',
-        type: '',
-        frame: '',
-        srNo: '',
-        dealerName: '',
-        dealerNumber: '',
+        Make: '',
+        HP: undefined,
+        KVA: undefined,
+        RPM: undefined,
+        Type: '',
+        Frame: '',
+        SrNo: '',
+        DealerName: '',
+        DealerNumber: '',
         works: '',
         spares: '',
-        industrialWorks: '',
+        industrialworks: '',
         attachments: [],
         warranty: false,
-        images: [], // Initialize images as an empty array
+        others: '',
+        images: [],
     };
 
     const handleFormSubmit = async (values: FormModel, { setSubmitting }: { setSubmitting: SetSubmitting }) => {
         setSubmitting(true);
-        // try {
-        //     const response = await apiCreateJobCard(values); // Call your API service
-        //     if (response.success) {
-        //         toast.push(
-        //             <Notification title="Job Card Created" type="success" duration={2500}>
-        //                 Job Card created successfully.
-        //             </Notification>,
-        //             { placement: 'top-center' }
-        //         );
-        //         navigate('/app/jobcards'); // Redirect to job cards list
-        //     }
-        // } catch (error) {
-        //     console.error('Error creating job card:', error);
-        //     toast.push(
-        //         <Notification title="Error" type="danger" duration={2500}>
-        //             Failed to create job card. Please try again.
-        //         </Notification>,
-        //         { placement: 'top-center' }
-        //     );
-        // } finally {
-        //     setSubmitting(false);
-        // }
+
+        const formData = new FormData();
+        Object.keys(values).forEach((key) => {
+            const value = values[key as keyof FormModel];
+            if (key === 'attachments' && Array.isArray(value)) {
+                value.forEach((attachment, index) => {
+                    formData.append(`attachments[${index}]`, attachment);
+                });
+            } else if (key === 'images' && Array.isArray(value)) {
+                value.forEach((file) => {
+                    formData.append('images', file);
+                });
+            } else if (value !== undefined && value !== null) {
+                formData.append(key, value.toString());
+            }
+        });
+
+        try {
+            const response = await axios.post('https://mytest.hitechengineeringcompany.in/api/jobcards', formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+            });
+
+            if (response.status !== 201) {
+                throw new Error('Failed to create job card');
+            }
+
+            toast.push(
+                <Notification title="Job Card Created" type="success" duration={2500}>
+                    Job Card created successfully.
+                </Notification>,
+                { placement: 'top-center' }
+            );
+
+            navigate('/sales/jobcard-list');
+        } catch (error) {
+            console.error('Error creating job card:', error);
+            toast.push(
+                <Notification title="Error" type="danger" duration={2500}>
+                    Failed to create job card. Please try again.
+                </Notification>,
+                { placement: 'top-center' }
+            );
+        } finally {
+            setSubmitting(false);
+        }
     };
 
     return (
@@ -156,7 +168,7 @@ const JobCardForm = forwardRef<FormikRef, JobCardFormProps>((props, ref) => {
                                     <JobCardMachineDetailsFields
                                         touched={touched}
                                         errors={errors}
-                                        values={values} // Pass values here
+                                        values={values}
                                     />
                                     <JobCardWorkDetailsFields
                                         touched={touched}

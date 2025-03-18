@@ -1,9 +1,8 @@
-import { useEffect, useMemo, useRef,useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import axios from 'axios';
-import { HiOutlinePencil, HiOutlineEye } from 'react-icons/hi'; // Changed HiOutlineTrash to HiOutlineEye
+import { HiOutlineEye } from 'react-icons/hi';
 import DataTable from '@/components/shared/DataTable';
-import Badge from '@/components/ui/Badge';
-import { useNavigate } from 'react-router-dom'; // Added for navigation
+import { useNavigate } from 'react-router-dom';
 import type { ColumnDef, DataTableResetHandle } from '@/components/shared/DataTable';
 
 interface JobCard {
@@ -15,30 +14,28 @@ interface JobCard {
   OutDate: string | null;
   jobCardStatus: string;
   warranty: boolean;
+  worker?: {
+    _id: string;
+    workerName: string;
+    workerImage: string;
+  };
+  invoiceNumber: string;
+  invoiceDate: string;
   images: { _id: string; image: string }[] | null;
   createdAt: string;
   updatedAt: string;
   __v: number;
 }
 
-const statusColorMap: Record<string, { dotClass: string }> = {
-  Completed: { dotClass: 'bg-emerald-500' },
-  Pending: { dotClass: 'bg-amber-500' },
-  Cancelled: { dotClass: 'bg-red-500' },
-  Returned: { dotClass: 'bg-blue-500' },
-  Billed: { dotClass: 'bg-purple-500' },
-  Created: { dotClass: 'bg-gray-500' },
-};
-
-const JobCardTable = ({
+const BilledTable = ({
   searchTerm,
   filters,
 }: {
   searchTerm: string;
-  filters: { status?: string[]; warranty?: boolean };
+  filters: { warranty?: boolean };
 }) => {
   const tableRef = useRef<DataTableResetHandle>(null);
-  const navigate = useNavigate(); // Added for navigation
+  const navigate = useNavigate();
   const [jobCards, setJobCards] = useState<JobCard[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [pageIndex, setPageIndex] = useState<number>(1);
@@ -56,17 +53,12 @@ const JobCardTable = ({
         const params: any = {
           page: pageIndex,
           limit: pageSize,
-          searchTerm:searchTerm?searchTerm:"",
+          searchTerm: searchTerm ? searchTerm : '',
+          billed: true, // Only fetch billed job cards
         };
         if (filters.warranty !== undefined) params.warranty = filters.warranty;
-        if (filters.status?.includes('Returned')) params.returned = true;
-        if (filters.status?.includes('Pending')) params.pending = true;
-        if (filters.status?.includes('Completed')) params.completed = true;
-        if (filters.status?.includes('Billed')) params.billed = true;
 
         const response = await axios.get('https://mytest.hitechengineeringcompany.in/api/jobcards/', { params });
-        console.log(response);
-        
         setJobCards(response.data?.data?.data);
         setTotal(response.data?.data?.countOfDocuments);
       } catch (error) {
@@ -93,21 +85,10 @@ const JobCardTable = ({
         accessorKey: 'phoneNumber',
       },
       {
-        header: 'In-Date',
+        header: 'Date',
         accessorKey: 'InDate',
         cell: (props) => (
           <span>{new Date(props.row.original.InDate).toLocaleDateString()}</span>
-        ),
-      },
-      {
-        header: 'Out-Date',
-        accessorKey: 'OutDate',
-        cell: (props) => (
-          <span>
-            {props.row.original.OutDate
-              ? new Date(props.row.original.OutDate).toLocaleDateString()
-              : '-'}
-          </span>
         ),
       },
       {
@@ -115,31 +96,43 @@ const JobCardTable = ({
         accessorKey: 'jobCardNumber',
       },
       {
-        header: 'Status',
-        accessorKey: 'jobCardStatus',
+        header: 'Worker',
+        accessorKey: 'worker',
         cell: (props) => {
-          const status = props.row.original.jobCardStatus;
-          return (
-            <div className="flex items-center gap-2">
-              <Badge className={statusColorMap[status]?.dotClass || 'bg-gray-500'} />
-              <span className="capitalize font-semibold">{status}</span>
+          const worker = props.row.original.worker;
+          return worker ? (
+            <div className="flex justify-center">
+              <img
+                src={worker.workerImage}
+                alt={worker.workerName}
+                className="w-10 h-10 rounded-full object-cover"
+              />
+            </div>
+          ) : (
+            <div className="flex justify-center">
+              <span>-</span>
             </div>
           );
         },
+      },
+      {
+        header: 'Invoice Number',
+        accessorKey: 'invoiceNumber',
+      },
+      {
+        header: 'Invoice Date',
+        accessorKey: 'invoiceDate',
+        cell: (props) => (
+          <span>{new Date(props.row.original.invoiceDate).toLocaleDateString()}</span>
+        ),
       },
       {
         header: 'Actions',
         id: 'actions',
         cell: (props) => (
           <div className="flex justify-end text-lg">
-            {/* <span
-              className="cursor-pointer p-2 hover:text-blue-500"
-              onClick={() => navigate(`/app/jobcards/edit/${props.row.original._id}`)}
-            >
-              <HiOutlinePencil />
-            </span> */}
             <span
-              className="cursor-pointer p-2 hover:text-green-500" // Changed color to green for view
+              className="cursor-pointer p-2 hover:text-green-500"
               onClick={() => navigate(`/app/jobcards/jobcard/${props.row.original._id}`)}
             >
               <HiOutlineEye />
@@ -170,4 +163,4 @@ const JobCardTable = ({
   );
 };
 
-export default JobCardTable;
+export default BilledTable;

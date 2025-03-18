@@ -5,61 +5,70 @@ import { Field, FormikErrors, FormikTouched } from 'formik';
 import { useState } from 'react';
 
 type FormFieldsName = {
-    make: string;
-    hp: string;
-    kva: string;
-    rpm: string;
-    type: string;
-    frame: string;
-    srNo: string;
-    dealerName: string;
-    dealerNumber: string;
-    warranty: boolean;
+    Make: string;
+    HP?: number;
+    KVA?: number;
+    RPM?: number;
+    Type?: string;
+    Frame: string;
+    SrNo: string;
+    DealerName?: string;
+    DealerNumber?: string;
+    warranty?: boolean;
 };
 
 type JobCardMachineDetailsFieldsProps = {
     touched: FormikTouched<FormFieldsName>;
     errors: FormikErrors<FormFieldsName>;
     values: {
-        hp: string;
-        kva: string;
+        HP?: number;
+        KVA?: number;
     };
 };
 
 const JobCardMachineDetailsFields = (props: JobCardMachineDetailsFieldsProps) => {
     const { touched, errors, values } = props;
-    const [selectedOption, setSelectedOption] = useState<'hp' | 'kva'>('hp'); // Default to 'hp'
+    const [selectedOption, setSelectedOption] = useState<'HP' | 'KVA'>('HP');
+
+    const handleInputKeyDown = (e: React.KeyboardEvent<HTMLElement>, nextFieldName?: string) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            if (nextFieldName) {
+                const nextField = document.querySelector(`[name="${nextFieldName}"]`) as HTMLElement;
+                nextField?.focus();
+            }
+        }
+    };
 
     return (
         <AdaptableCard divider className="mb-4">
             <h5>Machine Details</h5>
             <p className="mb-6">Section to configure machine information</p>
 
-            {/* Make Field */}
             <FormItem
                 label="Make"
-                invalid={!!errors.make && touched.make}
-                errorMessage={errors.make}
+                invalid={!!errors.Make && touched.Make}
+                errorMessage={errors.Make}
             >
                 <Field
                     type="text"
                     autoComplete="off"
-                    name="make"
+                    name="Make"
                     placeholder="Make"
                     component={Input}
+                    onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => handleInputKeyDown(e, 'HP')}
                 />
             </FormItem>
 
-            {/* HP/KVA Radio Buttons and Input */}
             <FormItem label="Select HP or KVA">
                 <div className="flex items-center gap-4 mb-4">
                     <label className="flex items-center">
                         <Field
                             type="radio"
                             name="selectedOption"
-                            value="hp"
-                            checked={selectedOption === 'hp'}
-                            onChange={() => setSelectedOption('hp')}
+                            value="HP"
+                            checked={selectedOption === 'HP'}
+                            onChange={() => setSelectedOption('HP')}
                             className="mr-2"
                         />
                         HP
@@ -68,56 +77,58 @@ const JobCardMachineDetailsFields = (props: JobCardMachineDetailsFieldsProps) =>
                         <Field
                             type="radio"
                             name="selectedOption"
-                            value="kva"
-                            checked={selectedOption === 'kva'}
-                            onChange={() => setSelectedOption('kva')}
+                            value="KVA"
+                            checked={selectedOption === 'KVA'}
+                            onChange={() => setSelectedOption('KVA')}
                             className="mr-2"
                         />
                         KVA
                     </label>
                 </div>
-                {selectedOption === 'hp' && (
+                {selectedOption === 'HP' && (
                     <FormItem
                         label="HP"
-                        invalid={!!errors.hp && touched.hp}
-                        errorMessage={errors.hp}
+                        invalid={!!errors.HP && touched.HP}
+                        errorMessage={errors.HP}
                     >
                         <Field
-                            type="text"
+                            type="number"
                             autoComplete="off"
-                            name="hp"
+                            name="HP"
                             placeholder="Enter HP"
                             component={Input}
+                            onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => handleInputKeyDown(e, 'RPM')}
                         />
                     </FormItem>
                 )}
-                {selectedOption === 'kva' && (
+                {selectedOption === 'KVA' && (
                     <FormItem
                         label="KVA"
-                        invalid={!!errors.kva && touched.kva}
-                        errorMessage={errors.kva}
+                        invalid={!!errors.KVA && touched.KVA}
+                        errorMessage={errors.KVA}
                     >
                         <Field
-                            type="text"
+                            type="number"
                             autoComplete="off"
-                            name="kva"
+                            name="KVA"
                             placeholder="Enter KVA"
                             component={Input}
+                            onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => handleInputKeyDown(e, 'RPM')}
                         />
                     </FormItem>
                 )}
             </FormItem>
 
-            {/* RPM Dropdown */}
             <FormItem
                 label="RPM"
-                invalid={!!errors.rpm && touched.rpm}
-                errorMessage={errors.rpm}
+                invalid={!!errors.RPM && touched.RPM}
+                errorMessage={errors.RPM}
             >
                 <Field
                     as="select"
-                    name="rpm"
+                    name="RPM"
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 dark:bg-[#1f2937] dark:border-gray-600 dark:text-white"
+                    onKeyDown={(e: React.KeyboardEvent<HTMLSelectElement>) => handleInputKeyDown(e, 'Type')}
                 >
                     <option value="">Select RPM</option>
                     <option value="710">710 RPM</option>
@@ -127,82 +138,81 @@ const JobCardMachineDetailsFields = (props: JobCardMachineDetailsFieldsProps) =>
                 </Field>
             </FormItem>
 
-            {/* Type Field */}
             <FormItem
                 label="Type"
-                invalid={!!errors.type && touched.type}
-                errorMessage={errors.type}
+                invalid={!!errors.Type && touched.Type}
+                errorMessage={errors.Type}
             >
                 <Field
                     type="text"
                     autoComplete="off"
-                    name="type"
+                    name="Type"
                     placeholder="Type"
                     component={Input}
+                    onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => handleInputKeyDown(e, 'Frame')}
                 />
             </FormItem>
 
-            {/* Frame Field */}
             <FormItem
                 label="Frame"
-                invalid={!!errors.frame && touched.frame}
-                errorMessage={errors.frame}
+                invalid={!!errors.Frame && touched.Frame}
+                errorMessage={errors.Frame}
             >
                 <Field
                     type="text"
                     autoComplete="off"
-                    name="frame"
+                    name="Frame"
                     placeholder="Frame"
                     component={Input}
+                    onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => handleInputKeyDown(e, 'SrNo')}
                 />
             </FormItem>
 
-            {/* Serial Number Field */}
             <FormItem
                 label="Serial Number"
-                invalid={!!errors.srNo && touched.srNo}
-                errorMessage={errors.srNo}
+                invalid={!!errors.SrNo && touched.SrNo}
+                errorMessage={errors.SrNo}
             >
                 <Field
                     type="text"
                     autoComplete="off"
-                    name="srNo"
+                    name="SrNo"
                     placeholder="Serial Number"
                     component={Input}
+                    onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => handleInputKeyDown(e, 'DealerName')}
                 />
             </FormItem>
 
-            {/* Dealer Name Field */}
             <FormItem
                 label="Dealer Name"
-                invalid={!!errors.dealerName && touched.dealerName}
-                errorMessage={errors.dealerName}
+                invalid={!!errors.DealerName && touched.DealerName}
+                errorMessage={errors.DealerName}
             >
                 <Field
                     type="text"
                     autoComplete="off"
-                    name="dealerName"
+                    name="DealerName"
                     placeholder="Dealer Name"
                     component={Input}
+                    onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => handleInputKeyDown(e, 'DealerNumber')}
                 />
             </FormItem>
 
-            {/* Dealer Number Field */}
             <FormItem
                 label="Dealer Number"
-                invalid={!!errors.dealerNumber && touched.dealerNumber}
-                errorMessage={errors.dealerNumber}
+                invalid={!!errors.DealerNumber && touched.DealerNumber}
+                errorMessage={errors.DealerNumber}
             >
                 <Field
                     type="text"
                     autoComplete="off"
-                    name="dealerNumber"
+                    name="DealerNumber"
                     placeholder="Dealer Number"
                     component={Input}
+                    onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => handleInputKeyDown(e, 'warranty')}
                 />
             </FormItem>
 
-            {/* Warranty Checkbox */}
             <FormItem label="Warranty">
                 <label className="flex items-center">
                     <Field
