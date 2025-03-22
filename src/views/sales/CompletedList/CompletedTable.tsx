@@ -9,6 +9,7 @@ import Drawer from '@/components/ui/Drawer';
 import toast from '@/components/ui/toast';
 import Notification from '@/components/ui/Notification';
 import Input from '@/components/ui/Input';
+import { BASE_URL } from '@/constants/app.constant';
 
 interface JobCard {
   _id: string;
@@ -70,7 +71,7 @@ const CompletedTable = ({
         };
         if (filters.warranty !== undefined) params.warranty = filters.warranty;
 
-        const response = await axios.get('https://mytest.hitechengineeringcompany.in/api/jobcards/', { params });
+        const response = await axios.get(`${BASE_URL}/jobcards/`, { params });
         setJobCards(response.data?.data?.data);
         setTotal(response.data?.data?.countOfDocuments);
       } catch (error) {
@@ -108,9 +109,9 @@ const CompletedTable = ({
     if (!selectedStatusJobCardId) return;
 
     try {
-      await axios.put(`https://mytest.hitechengineeringcompany.in/api/jobcards/pending?id=${selectedStatusJobCardId}`);
+      await axios.put(`${BASE_URL}/jobcards/pending?id=${selectedStatusJobCardId}`);
       // Refresh job cards
-      const response = await axios.get('https://mytest.hitechengineeringcompany.in/api/jobcards/', {
+      const response = await axios.get(`${BASE_URL}/jobcards/`, {
         params: { page: pageIndex, limit: pageSize, searchTerm, completed: true },
       });
       setJobCards(response.data?.data?.data);
@@ -133,9 +134,9 @@ const CompletedTable = ({
     if (!selectedStatusJobCardId) return;
 
     try {
-      await axios.put(`https://mytest.hitechengineeringcompany.in/api/jobcards/return?id=${selectedStatusJobCardId}`);
+      await axios.put(`${BASE_URL}/jobcards/return?id=${selectedStatusJobCardId}`);
       // Refresh job cards
-      const response = await axios.get('https://mytest.hitechengineeringcompany.in/api/jobcards/', {
+      const response = await axios.get(`${BASE_URL}/jobcards/`, {
         params: { page: pageIndex, limit: pageSize, searchTerm, completed: true },
       });
       setJobCards(response.data?.data?.data);
@@ -166,11 +167,11 @@ const CompletedTable = ({
   
     try {
       await axios.put(
-        `https://mytest.hitechengineeringcompany.in/api/jobcards/bill?id=${selectedBillJobCardId}&invoiceNumber=${invoiceNumber}`
+        `${BASE_URL}/jobcards/bill?id=${selectedBillJobCardId}&invoiceNumber=${invoiceNumber}`
       );
   
       // Refresh job cards
-      const response = await axios.get('https://mytest.hitechengineeringcompany.in/api/jobcards/', {
+      const response = await axios.get(`${BASE_URL}/jobcards/`, {
         params: { page: pageIndex, limit: pageSize, searchTerm, completed: true },
       });
       setJobCards(response.data?.data?.data);

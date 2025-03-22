@@ -9,6 +9,7 @@ import Button from '@/components/ui/Button';
 import Drawer from '@/components/ui/Drawer';
 import toast from '@/components/ui/toast';
 import Notification from '@/components/ui/Notification';
+import { BASE_URL } from '@/constants/app.constant';
 
 interface JobCard {
   _id: string;
@@ -78,7 +79,7 @@ const PendingTable = ({
         };
         if (filters.warranty !== undefined) params.warranty = filters.warranty;
 
-        const response = await axios.get('https://mytest.hitechengineeringcompany.in/api/jobcards/', { params });
+        const response = await axios.get(`${BASE_URL}/jobcards/`, { params });
         setJobCards(response.data?.data?.data);
         setTotal(response.data?.data?.countOfDocuments);
       } catch (error) {
@@ -97,7 +98,7 @@ const PendingTable = ({
 
     // Fetch available workers
     try {
-      const response = await axios.get('https://mytest.hitechengineeringcompany.in/api/worker/available');
+      const response = await axios.get(`${BASE_URL}/worker/available`);
       setAvailableWorkers(response.data.data);
     } catch (error) {
       console.error('Error fetching available workers:', error);
@@ -114,7 +115,7 @@ const PendingTable = ({
 
     try {
       // Assign worker to the job card
-      await axios.put('https://mytest.hitechengineeringcompany.in/api/worker/assign', {
+      await axios.put(`${BASE_URL}/worker/assign`, {
         workerId,
         jobcardId: selectedJobCardId,
       });
@@ -128,7 +129,7 @@ const PendingTable = ({
       };
       if (filters.warranty !== undefined) params.warranty = filters.warranty;
 
-      const response = await axios.get('https://mytest.hitechengineeringcompany.in/api/jobcards/', { params });
+      const response = await axios.get(`${BASE_URL}/jobcards/`, { params });
       setJobCards(response.data?.data?.data);
 
       // Close the drawer
@@ -152,9 +153,9 @@ const PendingTable = ({
     if (!selectedStatusJobCardId) return;
 
     try {
-      await axios.put(`https://mytest.hitechengineeringcompany.in/api/jobcards/return?id=${selectedStatusJobCardId}`);
+      await axios.put(`${BASE_URL}/jobcards/return?id=${selectedStatusJobCardId}`);
       // Refresh job cards
-      const response = await axios.get('https://mytest.hitechengineeringcompany.in/api/jobcards/', {
+      const response = await axios.get(`${BASE_URL}/jobcards/`, {
         params: { page: pageIndex, limit: pageSize, searchTerm, pending: true },
       });
       setJobCards(response.data?.data?.data);
@@ -177,9 +178,9 @@ const PendingTable = ({
     if (!selectedStatusJobCardId) return;
 
     try {
-      await axios.put(`https://mytest.hitechengineeringcompany.in/api/jobcards/work-done?id=${selectedStatusJobCardId}`);
+      await axios.put(`${BASE_URL}/jobcards/work-done?id=${selectedStatusJobCardId}`);
       // Refresh job cards
-      const response = await axios.get('https://mytest.hitechengineeringcompany.in/api/jobcards/', {
+      const response = await axios.get(`${BASE_URL}/jobcards/`, {
         params: { page: pageIndex, limit: pageSize, searchTerm, pending: true },
       });
       setJobCards(response.data?.data?.data);

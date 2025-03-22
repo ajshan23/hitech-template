@@ -44,9 +44,12 @@ const JobCardMachineDetailsFields = (props: JobCardMachineDetailsFieldsProps) =>
         <AdaptableCard divider className="mb-4">
             <h5>Machine Details</h5>
             <p className="mb-6">Section to configure machine information</p>
+            <div className="text-sm text-gray-500 dark:text-gray-400 mb-6">
+                Fields marked with * are required
+            </div>
 
             <FormItem
-                label="Make"
+                label="Make *"
                 invalid={!!errors.Make && touched.Make}
                 errorMessage={errors.Make}
             >
@@ -60,7 +63,7 @@ const JobCardMachineDetailsFields = (props: JobCardMachineDetailsFieldsProps) =>
                 />
             </FormItem>
 
-            <FormItem label="Select HP or KVA">
+            <FormItem label="Select HP or KVA (Optional)">
                 <div className="flex items-center gap-4 mb-4">
                     <label className="flex items-center">
                         <Field
@@ -120,7 +123,7 @@ const JobCardMachineDetailsFields = (props: JobCardMachineDetailsFieldsProps) =>
             </FormItem>
 
             <FormItem
-                label="RPM"
+                label="RPM (Optional)"
                 invalid={!!errors.RPM && touched.RPM}
                 errorMessage={errors.RPM}
             >
@@ -139,7 +142,7 @@ const JobCardMachineDetailsFields = (props: JobCardMachineDetailsFieldsProps) =>
             </FormItem>
 
             <FormItem
-                label="Type"
+                label="Type (Optional)"
                 invalid={!!errors.Type && touched.Type}
                 errorMessage={errors.Type}
             >
@@ -154,7 +157,7 @@ const JobCardMachineDetailsFields = (props: JobCardMachineDetailsFieldsProps) =>
             </FormItem>
 
             <FormItem
-                label="Frame"
+                label="Frame (Optional)"
                 invalid={!!errors.Frame && touched.Frame}
                 errorMessage={errors.Frame}
             >
@@ -169,7 +172,7 @@ const JobCardMachineDetailsFields = (props: JobCardMachineDetailsFieldsProps) =>
             </FormItem>
 
             <FormItem
-                label="Serial Number"
+                label="Serial Number (Optional)"
                 invalid={!!errors.SrNo && touched.SrNo}
                 errorMessage={errors.SrNo}
             >
@@ -184,7 +187,7 @@ const JobCardMachineDetailsFields = (props: JobCardMachineDetailsFieldsProps) =>
             </FormItem>
 
             <FormItem
-                label="Dealer Name"
+                label="Dealer Name (Optional)"
                 invalid={!!errors.DealerName && touched.DealerName}
                 errorMessage={errors.DealerName}
             >
@@ -199,13 +202,13 @@ const JobCardMachineDetailsFields = (props: JobCardMachineDetailsFieldsProps) =>
             </FormItem>
 
             <FormItem
-                label="Dealer Number"
+                label="Dealer Number (Optional)"
                 invalid={!!errors.DealerNumber && touched.DealerNumber}
                 errorMessage={errors.DealerNumber}
             >
                 <Field
-                    type="text"
-                    autoComplete="off"
+                    type="tel"
+                    autoComplete="tel"
                     name="DealerNumber"
                     placeholder="Dealer Number"
                     component={Input}
@@ -213,7 +216,7 @@ const JobCardMachineDetailsFields = (props: JobCardMachineDetailsFieldsProps) =>
                 />
             </FormItem>
 
-            <FormItem label="Warranty">
+            <FormItem label="Warranty (Optional)">
                 <label className="flex items-center">
                     <Field
                         type="checkbox"

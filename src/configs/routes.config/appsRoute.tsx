@@ -68,13 +68,13 @@ const appsRoute: Routes = [
         },
     },
     {
-        key: 'appsJobcard.onsiteNew',
+        key: 'appsOnsite.onsiteNew',
         path: `${APP_PREFIX_PATH}/onsite/form`,
         component: lazy(() => import('@/views/onSite/OnsiteCreation/OnSiteComplaintForm')),
         authority: [ADMIN, USER],
     },
     {
-        key: 'appsJobcard.onsiteNew',
+        key: 'appsOnsite.onsiteNew',
         path: `${APP_PREFIX_PATH}/onsite/form/:id`,
         component: lazy(() => import('@/views/onSite/OnsiteCreation/OnSiteComplaintForm')),
         authority: [ADMIN, USER],
@@ -118,6 +118,12 @@ const appsRoute: Routes = [
     {
         key: 'appsWorker.newWorker',
         path: `${APP_PREFIX_PATH}/worker/form`,
+        component: lazy(() => import('@/views/worker/WorkerList/WorkeCreatePage')),
+        authority: [ADMIN, USER],
+    },
+    {
+        key: 'appsWorker.editWorker',
+        path: `${APP_PREFIX_PATH}/worker/form/:id`,
         component: lazy(() => import('@/views/worker/WorkerList/WorkeCreatePage')),
         authority: [ADMIN, USER],
     },

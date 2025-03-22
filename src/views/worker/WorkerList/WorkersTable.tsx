@@ -4,6 +4,7 @@ import DataTable from '@/components/shared/DataTable';
 import Badge from '@/components/ui/Badge';
 import type { ColumnDef, DataTableResetHandle } from '@/components/shared/DataTable';
 import { HiCheck, HiX } from 'react-icons/hi'; // Icons for the toggle button
+import { BASE_URL } from '@/constants/app.constant';
 
 interface Worker {
   _id: string;
@@ -47,7 +48,7 @@ const WorkersTable = ({
           searchTerm: searchTerm ? searchTerm : "",
         };
 
-        const response = await axios.get('https://mytest.hitechengineeringcompany.in/api/worker', { params });
+        const response = await axios.get(`${BASE_URL}/worker`, { params });
         setWorkers(response.data?.data?.workers);
         setTotal(response.data?.data?.totalPages);
       } catch (error) {
@@ -64,7 +65,7 @@ const WorkersTable = ({
     try {
       // Make API call to toggle status
       const response = await axios.put(
-        `https://mytest.hitechengineeringcompany.in/api/worker/change-status?id=${workerId}`
+        `${BASE_URL}/worker/change-status?id=${workerId}`
       );
 
       // Update local state

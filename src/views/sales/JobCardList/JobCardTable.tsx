@@ -5,6 +5,7 @@ import DataTable from '@/components/shared/DataTable';
 import Badge from '@/components/ui/Badge';
 import { useNavigate } from 'react-router-dom'; // Added for navigation
 import type { ColumnDef, DataTableResetHandle } from '@/components/shared/DataTable';
+import { BASE_URL } from '@/constants/app.constant';
 
 interface JobCard {
   _id: string;
@@ -64,7 +65,7 @@ const JobCardTable = ({
         if (filters.status?.includes('Completed')) params.completed = true;
         if (filters.status?.includes('Billed')) params.billed = true;
 
-        const response = await axios.get('https://mytest.hitechengineeringcompany.in/api/jobcards/', { params });
+        const response = await axios.get(`${BASE_URL}/jobcards/`, { params });
         console.log(response);
         
         setJobCards(response.data?.data?.data);

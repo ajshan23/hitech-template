@@ -8,6 +8,7 @@ import type { ColumnDef, DataTableResetHandle } from '@/components/shared/DataTa
 import Button from '@/components/ui/Button';
 import Dialog from '@/components/ui/Dialog';
 import Drawer from '@/components/ui/Drawer';
+import { BASE_URL } from '@/constants/app.constant';
 
 interface OnSiteComplaint {
   _id: string;
@@ -86,7 +87,7 @@ const ClosedOnSiteComplaintsTable = ({
         if (warrantyFilter) params.warrantyStatus = "true"; // Convert boolean to string
         else params.warrantyStatus = "false"; // Convert boolean to string
   
-        const response = await axios.get('https://mytest.hitechengineeringcompany.in/api/onsite', { params });
+        const response = await axios.get(`${BASE_URL}/onsite`, { params });
         setComplaints(response.data.data.data);
         setTotal(response.data.data.countOfDocuments);
       } catch (error) {
@@ -118,7 +119,7 @@ const ClosedOnSiteComplaintsTable = ({
     try {
       // Update payment status to "Paid"
       await axios.put(
-        `https://mytest.hitechengineeringcompany.in/api/onsite/${selectedComplaintId}/payment-status`,
+        `${BASE_URL}/onsite/${selectedComplaintId}/payment-status`,
         { paymentStatus: 'Paid' }
       );
 
@@ -132,7 +133,7 @@ const ClosedOnSiteComplaintsTable = ({
       if (warrantyFilter) params.warrantyStatus = "true";
       else params.warrantyStatus = "false";
 
-      const response = await axios.get('https://mytest.hitechengineeringcompany.in/api/onsite', { params });
+      const response = await axios.get(`${BASE_URL}/onsite`, { params });
       setComplaints(response.data.data.data);
 
       // Close the modal
@@ -161,7 +162,7 @@ const ClosedOnSiteComplaintsTable = ({
     try {
       // Update complaint status
       await axios.put(
-        `https://mytest.hitechengineeringcompany.in/api/onsite/${selectedStatusComplaintId}/status`,
+        `${BASE_URL}/onsite/${selectedStatusComplaintId}/status`,
         { complaintStatus: status }
       );
 
@@ -175,7 +176,7 @@ const ClosedOnSiteComplaintsTable = ({
       if (warrantyFilter) params.warrantyStatus = "true";
       else params.warrantyStatus = "false";
 
-      const response = await axios.get('https://mytest.hitechengineeringcompany.in/api/onsite', { params });
+      const response = await axios.get(`${BASE_URL}/onsite`, { params });
       setComplaints(response.data.data.data);
 
       // Close the drawer

@@ -7,6 +7,7 @@ import { useNavigate } from 'react-router-dom';
 import type { ColumnDef, DataTableResetHandle } from '@/components/shared/DataTable';
 import Button from '@/components/ui/Button';
 import Drawer from '@/components/ui/Drawer';
+import { BASE_URL } from '@/constants/app.constant';
 
 interface OnSiteComplaint {
   _id: string;
@@ -76,7 +77,7 @@ const SentToWorkshopOnSiteComplaintsTable = ({
         if (warrantyFilter) params.warrantyStatus = "true"; // Convert boolean to string
         else params.warrantyStatus = "false"; // Convert boolean to string
 
-        const response = await axios.get('https://mytest.hitechengineeringcompany.in/api/onsite', { params });
+        const response = await axios.get(`${BASE_URL}/onsite`, { params });
         setComplaints(response.data.data.data);
         setTotal(response.data.data.countOfDocuments);
       } catch (error) {
@@ -108,7 +109,7 @@ const SentToWorkshopOnSiteComplaintsTable = ({
     try {
       // Update complaint status
       await axios.put(
-        `https://mytest.hitechengineeringcompany.in/api/onsite/${selectedStatusComplaintId}/status`,
+        `${BASE_URL}/onsite/${selectedStatusComplaintId}/status`,
         { complaintStatus: status }
       );
 
@@ -122,7 +123,7 @@ const SentToWorkshopOnSiteComplaintsTable = ({
       if (warrantyFilter) params.warrantyStatus = "true";
       else params.warrantyStatus = "false";
 
-      const response = await axios.get('https://mytest.hitechengineeringcompany.in/api/onsite', { params });
+      const response = await axios.get(`${BASE_URL}/onsite`, { params });
       setComplaints(response.data.data.data);
 
       // Close the drawer

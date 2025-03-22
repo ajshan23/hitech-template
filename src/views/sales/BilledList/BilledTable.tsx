@@ -4,6 +4,7 @@ import { HiOutlineEye } from 'react-icons/hi';
 import DataTable from '@/components/shared/DataTable';
 import { useNavigate } from 'react-router-dom';
 import type { ColumnDef, DataTableResetHandle } from '@/components/shared/DataTable';
+import { BASE_URL } from '@/constants/app.constant';
 
 interface JobCard {
   _id: string;
@@ -58,7 +59,7 @@ const BilledTable = ({
         };
         if (filters.warranty !== undefined) params.warranty = filters.warranty;
 
-        const response = await axios.get('https://mytest.hitechengineeringcompany.in/api/jobcards/', { params });
+        const response = await axios.get(`${BASE_URL}/jobcards/`, { params });
         setJobCards(response.data?.data?.data);
         setTotal(response.data?.data?.countOfDocuments);
       } catch (error) {

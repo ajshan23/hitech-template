@@ -8,6 +8,7 @@ import Button from '@/components/ui/Button';
 import Drawer from '@/components/ui/Drawer';
 import toast from '@/components/ui/toast';
 import Notification from '@/components/ui/Notification';
+import { BASE_URL } from '@/constants/app.constant';
 
 interface JobCard {
   _id: string;
@@ -64,7 +65,7 @@ const ReturnTable = ({
         };
         if (filters.warranty !== undefined) params.warranty = filters.warranty;
 
-        const response = await axios.get('https://mytest.hitechengineeringcompany.in/api/jobcards/', { params });
+        const response = await axios.get(`${BASE_URL}/jobcards/`, { params });
         setJobCards(response.data?.data?.data);
         setTotal(response.data?.data?.countOfDocuments);
       } catch (error) {
@@ -91,9 +92,9 @@ const ReturnTable = ({
     if (!selectedStatusJobCardId) return;
 
     try {
-      await axios.put(`https://mytest.hitechengineeringcompany.in/api/jobcards/pending?id=${selectedStatusJobCardId}`);
+      await axios.put(`${BASE_URL}/jobcards/pending?id=${selectedStatusJobCardId}`);
       // Refresh job cards
-      const response = await axios.get('https://mytest.hitechengineeringcompany.in/api/jobcards/', {
+      const response = await axios.get(`${BASE_URL}/jobcards/`, {
         params: { page: pageIndex, limit: pageSize, searchTerm, returned: true },
       });
       setJobCards(response.data?.data?.data);
@@ -116,9 +117,9 @@ const ReturnTable = ({
     if (!selectedStatusJobCardId) return;
 
     try {
-      await axios.put(`https://mytest.hitechengineeringcompany.in/api/jobcards/work-done?id=${selectedStatusJobCardId}`);
+      await axios.put(`${BASE_URL}/jobcards/work-done?id=${selectedStatusJobCardId}`);
       // Refresh job cards
-      const response = await axios.get('https://mytest.hitechengineeringcompany.in/api/jobcards/', {
+      const response = await axios.get(`${BASE_URL}/jobcards/`, {
         params: { page: pageIndex, limit: pageSize, searchTerm, returned: true },
       });
       setJobCards(response.data?.data?.data);

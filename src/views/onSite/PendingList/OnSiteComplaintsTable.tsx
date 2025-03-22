@@ -9,6 +9,7 @@ import Button from '@/components/ui/Button';
 import Drawer from '@/components/ui/Drawer';
 import toast from '@/components/ui/toast';
 import Notification from '@/components/ui/Notification';
+import { BASE_URL } from '@/constants/app.constant';
 
 // Define warrantyColorMap
 const warrantyColorMap: Record<string, { dotClass: string }> = {
@@ -93,7 +94,7 @@ const PendingOnSiteComplaintsTable = ({
         if (warrantyFilter) params.warrantyStatus = "true"; // Convert boolean to string
         else params.warrantyStatus = "false"; // Convert boolean to string
   
-        const response = await axios.get('https://mytest.hitechengineeringcompany.in/api/onsite', { params });
+        const response = await axios.get(`${BASE_URL}/onsite`, { params });
         setComplaints(response.data.data.data);
         setTotal(response.data.data.countOfDocuments);
       } catch (error) {
@@ -112,7 +113,7 @@ const PendingOnSiteComplaintsTable = ({
 
     // Fetch available workers
     try {
-      const response = await axios.get('https://mytest.hitechengineeringcompany.in/api/worker/available');
+      const response = await axios.get(`${BASE_URL}/worker/available`);
       setAvailableWorkers(response.data.data);
     } catch (error) {
       console.error('Error fetching available workers:', error);
@@ -129,7 +130,7 @@ const PendingOnSiteComplaintsTable = ({
 
     try {
       // Assign worker to the complaint
-      await axios.put(`https://mytest.hitechengineeringcompany.in/api/onsite/${selectedComplaintId}/assign-worker`, {
+      await axios.put(`${BASE_URL}/onsite/${selectedComplaintId}/assign-worker`, {
         workerId,
       });
 
@@ -143,7 +144,7 @@ const PendingOnSiteComplaintsTable = ({
       if (warrantyFilter) params.warrantyStatus = "true";
       else params.warrantyStatus = "false";
 
-      const response = await axios.get('https://mytest.hitechengineeringcompany.in/api/onsite', { params });
+      const response = await axios.get(`${BASE_URL}/onsite`, { params });
       setComplaints(response.data.data.data);
 
       // Close the drawer
@@ -169,7 +170,7 @@ const PendingOnSiteComplaintsTable = ({
     try {
       // Update complaint status
       await axios.put(
-        `https://mytest.hitechengineeringcompany.in/api/onsite/${selectedStatusComplaintId}/status`,
+        `${BASE_URL}/onsite/${selectedStatusComplaintId}/status`,
         { complaintStatus: status } // Send complaintStatus in the request body
       );
 
@@ -183,7 +184,7 @@ const PendingOnSiteComplaintsTable = ({
       if (warrantyFilter) params.warrantyStatus = "true";
       else params.warrantyStatus = "false";
 
-      const response = await axios.get('https://mytest.hitechengineeringcompany.in/api/onsite', { params });
+      const response = await axios.get(`${BASE_URL}/onsite`, { params });
       setComplaints(response.data.data.data);
 
       // Show success toast

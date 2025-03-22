@@ -27,10 +27,10 @@ const appsNavigationConfig: NavigationTree[] = [
                 authority: [ADMIN, USER],
                 subMenu: [
                     {
-                        key: 'appsJobcard.dashboard',
-                        path: `${APP_PREFIX_PATH}/jobcards/dashboard`,
-                        title: 'Dashboard',
-                        translateKey: 'nav.appsJobcard.dashboard',
+                        key: 'appsJobcard.jobcardNew',
+                        path: `${APP_PREFIX_PATH}/jobcards/jobcard-new`,
+                        title: 'Create Jobcard',
+                        translateKey: 'nav.appsJobcard.jobcardNew',
                         icon: '',
                         type: NAV_ITEM_TYPE_ITEM,
                         authority: [ADMIN, USER],
@@ -117,10 +117,10 @@ const appsNavigationConfig: NavigationTree[] = [
                 authority: [ADMIN, USER],
                 subMenu: [
                     {
-                        key: 'appsOnsite.dashboard',
-                        path: `${APP_PREFIX_PATH}/jobcards/dashboard`,
-                        title: 'Dashboard',
-                        translateKey: 'nav.appsJobcard.dashboard',
+                        key: 'appsOnsite.onsiteNew',
+                        path: `${APP_PREFIX_PATH}/onsite/form`,
+                        title: 'Create onsite',
+                        translateKey: 'nav.appsOnsite.onsiteNew',
                         icon: '',
                         type: NAV_ITEM_TYPE_ITEM,
                         authority: [ADMIN, USER],

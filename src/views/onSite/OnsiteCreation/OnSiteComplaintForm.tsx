@@ -10,6 +10,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import OnSiteComplaintBasicInfoFields from './Components/OnSiteComplaintBasicInfoFields';
 import OnSiteComplaintDetailsFields from './Components/OnSiteComplaintDetailsFields';
 import axios from 'axios';
+import { BASE_URL } from '@/constants/app.constant';
 
 // Types
 type FormikRef = FormikProps<any>;
@@ -37,16 +38,15 @@ type OnSiteComplaintFormProps = {
 const validationSchema = Yup.object().shape({
     customerName: Yup.string().required('Customer Name is required'),
     customerAddress: Yup.string().required('Customer Address is required'),
-    complaintNumber: Yup.string().required('Complaint Number is required'),
     phoneNumbers: Yup.array()
         .of(Yup.string().required('Phone Number is required'))
         .min(1, 'At least one phone number is required'),
-    make: Yup.string().required('Make is required'),
+    complaintNumber: Yup.string().nullable(),
+    make: Yup.string().nullable(),
     dealerName: Yup.string().nullable(),
-    warrantyStatus: Yup.string().required('Warranty Status is required'),
-    reportedComplaint: Yup.string().required('Reported Complaint is required'),
-});
-
+    warrantyStatus: Yup.string().nullable(),
+    reportedComplaint: Yup.string().nullable(),
+}); 
 const OnSiteComplaintForm = forwardRef<FormikRef, OnSiteComplaintFormProps>((props, ref) => {
     const { onDiscard } = props;
     const navigate = useNavigate();
@@ -69,7 +69,7 @@ const OnSiteComplaintForm = forwardRef<FormikRef, OnSiteComplaintFormProps>((pro
         if (type === 'edit' && id) {
             const fetchComplaintDetails = async () => {
                 try {
-                    const response = await axios.get(`https://mytest.hitechengineeringcompany.in/api/onsite/${id}`);
+                    const response = await axios.get(`${BASE_URL}/onsite/${id}`);
                     console.log('API Response:', response.data); // Debug the response
                     const complaint = response.data.data;
 
@@ -104,8 +104,8 @@ const OnSiteComplaintForm = forwardRef<FormikRef, OnSiteComplaintFormProps>((pro
 
         try {
             const url = type === 'new' 
-                ? 'https://mytest.hitechengineeringcompany.in/api/onsite' 
-                : `https://mytest.hitechengineeringcompany.in/api/onsite/${id}`;
+                ? `${BASE_URL}/onsite` 
+                : `${BASE_URL}/onsite/${id}`;
             const method = type === 'new' ? 'post' : 'put';
 
             console.log('Sending payload:', values); // Debug payload

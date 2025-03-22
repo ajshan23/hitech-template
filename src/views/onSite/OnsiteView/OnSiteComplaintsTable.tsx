@@ -5,6 +5,7 @@ import DataTable from '@/components/shared/DataTable';
 import Badge from '@/components/ui/Badge';
 import { useNavigate } from 'react-router-dom';
 import type { ColumnDef, DataTableResetHandle } from '@/components/shared/DataTable';
+import { BASE_URL } from '@/constants/app.constant';
 
 interface OnSiteComplaint {
   _id: string;
@@ -66,7 +67,7 @@ const OnSiteComplaintsTable = ({
         if (filters.complaintStatus?.includes('Closed')) params.closed = true;
         if (filters.complaintStatus?.includes('Sent to Workshop')) params.sentToWorkshop = true;
 
-        const response = await axios.get('https://mytest.hitechengineeringcompany.in/api/onsite', { params });
+        const response = await axios.get(`${BASE_URL}/onsite`, { params });
         setComplaints(response.data.data.data);
         setTotal(response.data.data.countOfDocuments);
       } catch (error) {

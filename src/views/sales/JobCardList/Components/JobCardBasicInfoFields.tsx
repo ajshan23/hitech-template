@@ -3,23 +3,29 @@ import Input from '@/components/ui/Input';
 import { FormItem } from '@/components/ui/Form';
 import { Field, FormikErrors, FormikTouched, useFormikContext } from 'formik';
 import { useEffect, useRef } from 'react';
+import { Button } from '@/components/ui';
 
 type FormFieldsName = {
     customerName: string;
     customerAddress: string;
-    phoneNumber: string;
+    phoneNumbers: string[];
 };
 
 type JobCardBasicInfoFieldsProps = {
     touched: FormikTouched<FormFieldsName>;
     errors: FormikErrors<FormFieldsName>;
+    values: FormFieldsName;
 };
 
 const JobCardBasicInfoFields = (props: JobCardBasicInfoFieldsProps) => {
-    const { touched, errors } = props;
-    const { values } = useFormikContext<FormFieldsName>();
-    const textareaRef = useRef<HTMLTextAreaElement>(null);
+    const { touched, errors, values } = props;
+    const { setFieldValue } = useFormikContext<FormFieldsName>();
+    const addressTextareaRef = useRef<HTMLTextAreaElement>(null);
 
+    // Ensure phoneNumbers is always an array
+    const phoneNumbers = values.phoneNumbers || [];
+
+    // Handle Enter key for navigation
     const handleInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>, nextFieldName?: string) => {
         if (e.key === 'Enter') {
             e.preventDefault();
@@ -30,24 +36,11 @@ const JobCardBasicInfoFields = (props: JobCardBasicInfoFieldsProps) => {
         }
     };
 
-    const handleTextareaKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>, nextFieldName?: string) => {
-        if (e.key === 'Enter') {
-            if (e.shiftKey) {
-                return;
-            } else {
-                e.preventDefault();
-                if (nextFieldName) {
-                    const nextField = document.querySelector(`[name="${nextFieldName}"]`) as HTMLElement;
-                    nextField?.focus();
-                }
-            }
-        }
-    };
-
+    // Auto-resize textarea
     useEffect(() => {
-        if (textareaRef.current) {
-            textareaRef.current.style.height = 'auto';
-            textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
+        if (addressTextareaRef.current) {
+            addressTextareaRef.current.style.height = 'auto';
+            addressTextareaRef.current.style.height = `${addressTextareaRef.current.scrollHeight}px`;
         }
     }, [values.customerAddress]);
 
@@ -55,9 +48,12 @@ const JobCardBasicInfoFields = (props: JobCardBasicInfoFieldsProps) => {
         <AdaptableCard divider className="mb-4">
             <h5>Customer Details</h5>
             <p className="mb-6">Section to configure customer information</p>
+            <div className="text-sm text-gray-500 dark:text-gray-400 mb-6">
+                Fields marked with * are required
+            </div>
 
             <FormItem
-                label="Customer Name"
+                label="Customer Name *"
                 invalid={!!errors.customerName && touched.customerName}
                 errorMessage={errors.customerName}
             >
@@ -72,7 +68,7 @@ const JobCardBasicInfoFields = (props: JobCardBasicInfoFieldsProps) => {
             </FormItem>
 
             <FormItem
-                label="Customer Address"
+                label="Customer Address *"
                 invalid={!!errors.customerAddress && touched.customerAddress}
                 errorMessage={errors.customerAddress}
             >
@@ -82,25 +78,34 @@ const JobCardBasicInfoFields = (props: JobCardBasicInfoFieldsProps) => {
                     placeholder="Customer Address"
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 dark:bg-[#1f2937] dark:border-gray-600 dark:text-white dark:placeholder-gray-400"
                     rows={1}
-                    innerRef={textareaRef}
-                    onKeyDown={(e: React.KeyboardEvent<HTMLTextAreaElement>) => handleTextareaKeyDown(e, 'phoneNumber')}
+                    innerRef={addressTextareaRef}
                     style={{ overflow: 'hidden', resize: 'none' }}
                 />
             </FormItem>
 
             <FormItem
-                label="Phone Number"
-                invalid={!!errors.phoneNumber && touched.phoneNumber}
-                errorMessage={errors.phoneNumber}
+                label="Phone Numbers *"
+                invalid={!!errors.phoneNumbers && touched.phoneNumbers}
+                // errorMessage={errors.phoneNumbers}
             >
-                <Field
-                    type="text"
-                    autoComplete="off"
-                    name="phoneNumber"
-                    placeholder="Phone Number"
-                    component={Input}
-                    onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => handleInputKeyDown(e)}
-                />
+                {phoneNumbers.map((phone, index) => (
+                    <Field
+                        key={index}
+                        type="tel"
+                        autoComplete="tel"
+                        name={`phoneNumbers[${index}]`}
+                        placeholder={`Phone Number ${index + 1}`}
+                        component={Input}
+                        className="mb-2"
+                    />
+                ))}
+                <Button
+                    size="sm"
+                    type="button"
+                    onClick={() => setFieldValue('phoneNumbers', [...phoneNumbers, ''])}
+                >
+                    Add Phone Number
+                </Button>
             </FormItem>
         </AdaptableCard>
     );

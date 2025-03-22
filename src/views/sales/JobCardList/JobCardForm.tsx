@@ -12,6 +12,7 @@ import JobCardMachineDetailsFields from './Components/JobCardMachineDetailsField
 import JobCardWorkDetailsFields from './Components/JobCardWorkDetailsFields';
 import JobCardImages from './Components/JobCardImages';
 import axios from 'axios';
+import { BASE_URL } from '@/constants/app.constant';
 
 // Types
 type FormikRef = FormikProps<any>;
@@ -19,14 +20,14 @@ type FormikRef = FormikProps<any>;
 type InitialData = {
     customerName: string;
     customerAddress: string;
-    phoneNumber: string;
+    phoneNumbers: string[]; // Array of strings
     Make: string;
     HP?: number;
     KVA?: number;
     RPM?: number;
     Type?: string;
-    Frame: string;
-    SrNo: string;
+    Frame?: string;
+    SrNo?: string;
     DealerName?: string;
     DealerNumber?: string;
     works?: string;
@@ -52,8 +53,10 @@ type JobCardFormProps = {
 const validationSchema = Yup.object().shape({
     customerName: Yup.string().required('Customer Name is required'),
     customerAddress: Yup.string().required('Customer Address is required'),
-    phoneNumber: Yup.string().required('Phone Number is required'),
-    Make: Yup.string().nullable(),
+    phoneNumbers: Yup.array()
+        .of(Yup.string().required('Phone Number is required'))
+        .min(1, 'At least one phone number is required'), // Ensure at least one phone number
+    Make: Yup.string().required('Make is required'),
     HP: Yup.number().nullable(),
     KVA: Yup.number().nullable(),
     RPM: Yup.number().nullable(),
@@ -66,7 +69,7 @@ const validationSchema = Yup.object().shape({
     spares: Yup.string().nullable(),
     industrialworks: Yup.string().nullable(),
     attachments: Yup.array().of(Yup.string()),
-    warranty: Yup.boolean(),
+    warranty: Yup.boolean().nullable(),
     others: Yup.string().nullable(),
     images: Yup.array().of(Yup.mixed()),
 });
@@ -78,7 +81,7 @@ const JobCardForm = forwardRef<FormikRef, JobCardFormProps>((props, ref) => {
     const initialValues: FormModel = {
         customerName: '',
         customerAddress: '',
-        phoneNumber: '',
+        phoneNumbers: [''], // Initialize with one empty phone number
         Make: '',
         HP: undefined,
         KVA: undefined,
@@ -99,41 +102,51 @@ const JobCardForm = forwardRef<FormikRef, JobCardFormProps>((props, ref) => {
 
     const handleFormSubmit = async (values: FormModel, { setSubmitting }: { setSubmitting: SetSubmitting }) => {
         setSubmitting(true);
-
+    
         const formData = new FormData();
+    
+        // Append all fields to FormData
         Object.keys(values).forEach((key) => {
             const value = values[key as keyof FormModel];
             if (key === 'attachments' && Array.isArray(value)) {
-                value.forEach((attachment, index) => {
-                    formData.append(`attachments[${index}]`, attachment);
+                value.forEach((attachment) => {
+                    formData.append('attachments', attachment);
                 });
             } else if (key === 'images' && Array.isArray(value)) {
                 value.forEach((file) => {
-                    formData.append('images', file);
+                    formData.append('files', file);
                 });
+            } else if (key === 'phoneNumbers') {
+                // Convert comma-separated string to array of strings
+                const phoneNumbersArray = (typeof value === 'string' ? value.split(',') : Array.isArray(value) ? value : []) as string[];
+                if (phoneNumbersArray.length > 0) {
+                    phoneNumbersArray.forEach((phone, index) => {
+                        formData.append(`phoneNumbers[${index}]`, phone);
+                    });
+                }
             } else if (value !== undefined && value !== null) {
                 formData.append(key, value.toString());
             }
         });
-
+    
         try {
-            const response = await axios.post('https://mytest.hitechengineeringcompany.in/api/jobcards', formData, {
+            const response = await axios.post(`${BASE_URL}/jobcards`, formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                 },
             });
-
+    
             if (response.status !== 201) {
                 throw new Error('Failed to create job card');
             }
-
+    
             toast.push(
                 <Notification title="Job Card Created" type="success" duration={2500}>
                     Job Card created successfully.
                 </Notification>,
                 { placement: 'top-center' }
             );
-
+    
             navigate('/sales/jobcard-list');
         } catch (error) {
             console.error('Error creating job card:', error);
@@ -147,7 +160,6 @@ const JobCardForm = forwardRef<FormikRef, JobCardFormProps>((props, ref) => {
             setSubmitting(false);
         }
     };
-
     return (
         <>
             <Formik
@@ -156,57 +168,66 @@ const JobCardForm = forwardRef<FormikRef, JobCardFormProps>((props, ref) => {
                 validationSchema={validationSchema}
                 onSubmit={handleFormSubmit}
             >
-                {({ values, touched, errors, isSubmitting }) => (
-                    <Form>
-                        <FormContainer>
-                            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-                                <div className="lg:col-span-2">
-                                    <JobCardBasicInfoFields
-                                        touched={touched}
-                                        errors={errors}
-                                    />
-                                    <JobCardMachineDetailsFields
-                                        touched={touched}
-                                        errors={errors}
-                                        values={values}
-                                    />
-                                    <JobCardWorkDetailsFields
-                                        touched={touched}
-                                        errors={errors}
-                                    />
+                {({ values, touched, errors, isSubmitting }) => {
+                    // Check for required field errors and scroll to top
+                    const hasRequiredFieldErrors = errors.customerName || errors.customerAddress || errors.phoneNumbers || errors.Make;
+                    if (hasRequiredFieldErrors && Object.keys(touched).length > 0) {
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }
+
+                    return (
+                        <Form>
+                            <FormContainer>
+                                <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                                    <div className="lg:col-span-2">
+                                        <JobCardBasicInfoFields
+                                            touched={touched}
+                                            errors={errors}
+                                            values={values}
+                                        />
+                                        <JobCardMachineDetailsFields
+                                            touched={touched}
+                                            errors={errors}
+                                            values={values}
+                                        />
+                                        <JobCardWorkDetailsFields
+                                            touched={touched}
+                                            errors={errors}
+                                        />
+                                    </div>
+                                    <div className="lg:col-span-1">
+                                        <JobCardImages values={{ images: values.images }} />
+                                    </div>
                                 </div>
-                                <div className="lg:col-span-1">
-                                    <JobCardImages values={{ images: values.images }} />
-                                </div>
-                            </div>
-                            <StickyFooter
-                                className="-mx-8 px-8 flex items-center justify-between py-4"
-                                stickyClass="border-t bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700"
-                            >
-                                <div>
-                                    <Button
-                                        size="sm"
-                                        className="ltr:mr-3 rtl:ml-3"
-                                        type="button"
-                                        onClick={onDiscard}
-                                    >
-                                        Discard
-                                    </Button>
-                                </div>
-                                <div className="md:flex items-center">
-                                    <Button
-                                        size="sm"
-                                        variant="solid"
-                                        loading={isSubmitting}
-                                        type="submit"
-                                    >
-                                        Create Job Card
-                                    </Button>
-                                </div>
-                            </StickyFooter>
-                        </FormContainer>
-                    </Form>
-                )}
+                                <StickyFooter
+                                    className="-mx-8 px-8 flex items-center justify-between py-4"
+                                    stickyClass="border-t bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700"
+                                >
+                                    <div>
+                                        <Button
+                                            size="sm"
+                                            className="ltr:mr-3 rtl:ml-3"
+                                            type="button"
+                                            onClick={onDiscard}
+                                        >
+                                            Discard
+                                        </Button>
+                                    </div>
+                                    <div className="md:flex items-center">
+                                        <Button
+                                            size="sm"
+                                            variant="solid"
+                                            loading={isSubmitting}
+                                            type="submit"
+                                        >
+                                            Create Job Card
+                                        </Button>
+                                    </div>
+                                </StickyFooter>
+                            </FormContainer>
+                        </Form>
+                    );
+                }}
             </Formik>
         </>
     );

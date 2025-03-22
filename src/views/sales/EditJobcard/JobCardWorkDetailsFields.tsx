@@ -8,7 +8,7 @@ type FormFieldsName = {
   spares?: string;
   industrialworks?: string;
   others?: string;
-  attachments: string[]; // Ensure attachments is always an array
+  attachments: string[];
 };
 
 type JobCardWorkDetailsFieldsProps = {
@@ -20,20 +20,17 @@ const JobCardWorkDetailsFields = (props: JobCardWorkDetailsFieldsProps) => {
   const { touched, errors } = props;
   const { values, setFieldValue } = useFormikContext<FormFieldsName>();
 
-  // Ensure attachments is always an array
   useEffect(() => {
     if (!values.attachments) {
       setFieldValue("attachments", []);
     }
   }, [values.attachments, setFieldValue]);
 
-  // Refs for auto-resizing textareas
   const worksTextareaRef = useRef<HTMLTextAreaElement | null>(null);
   const sparesTextareaRef = useRef<HTMLTextAreaElement | null>(null);
   const industrialworksTextareaRef = useRef<HTMLTextAreaElement | null>(null);
   const othersTextareaRef = useRef<HTMLTextAreaElement | null>(null);
 
-  // Handle Enter and Shift+Enter for textarea fields
   const handleTextareaKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>, nextFieldName?: string) => {
     if (e.key === "Enter") {
       if (e.shiftKey) {
@@ -48,7 +45,6 @@ const JobCardWorkDetailsFields = (props: JobCardWorkDetailsFieldsProps) => {
     }
   };
 
-  // Auto-resize textarea height based on content
   const autoResizeTextarea = (ref: React.RefObject<HTMLTextAreaElement | null>) => {
     if (ref.current) {
       ref.current.style.height = "auto";
@@ -61,12 +57,18 @@ const JobCardWorkDetailsFields = (props: JobCardWorkDetailsFieldsProps) => {
   useEffect(() => autoResizeTextarea(industrialworksTextareaRef), [values.industrialworks]);
   useEffect(() => autoResizeTextarea(othersTextareaRef), [values.others]);
 
+  const handleAttachmentChange = (value: string, checked: boolean) => {
+    const updatedAttachments = checked
+      ? [...(values.attachments || []), value]
+      : (values.attachments || []).filter((item) => item !== value);
+    setFieldValue("attachments", updatedAttachments);
+  };
+
   return (
     <AdaptableCard divider className="mb-4">
       <h5>Work Details</h5>
       <p className="mb-6">Section to configure work information</p>
 
-      {/* Works Field */}
       <FormItem
         label="Works"
         invalid={!!errors.works && touched.works}
@@ -84,7 +86,6 @@ const JobCardWorkDetailsFields = (props: JobCardWorkDetailsFieldsProps) => {
         />
       </FormItem>
 
-      {/* Spares Field */}
       <FormItem
         label="Spares"
         invalid={!!errors.spares && touched.spares}
@@ -102,7 +103,6 @@ const JobCardWorkDetailsFields = (props: JobCardWorkDetailsFieldsProps) => {
         />
       </FormItem>
 
-      {/* Industrial Works Field */}
       <FormItem
         label="Industrial Works"
         invalid={!!errors.industrialworks && touched.industrialworks}
@@ -120,7 +120,6 @@ const JobCardWorkDetailsFields = (props: JobCardWorkDetailsFieldsProps) => {
         />
       </FormItem>
 
-      {/* Others Field */}
       <FormItem
         label="Others"
         invalid={!!errors.others && touched.others}
@@ -138,89 +137,134 @@ const JobCardWorkDetailsFields = (props: JobCardWorkDetailsFieldsProps) => {
         />
       </FormItem>
 
-      {/* Attachments Checkbox Group */}
       <FormItem label="Select Additional Fittings">
-        <div className="flex flex-col">
-          <div className="flex flex-row gap-4">
-            {/* Fan */}
-            <div className="flex items-center">
-              <Field
-                type="checkbox"
-                id="fan"
-                name="attachments"
-                value="fan"
-                checked={values.attachments?.includes("fan")} // Safely check if array includes value
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                  const { value, checked } = e.target;
-                  const updatedAttachments = checked
-                    ? [...(values.attachments || []), value]
-                    : (values.attachments || []).filter((item) => item !== value);
-                  setFieldValue("attachments", updatedAttachments);
-                }}
-                className="mr-2"
-              />
-              <label htmlFor="fan" className="text-gray-800 dark:text-white">Fan</label>
-            </div>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          {/* Fan */}
+          <div className="flex items-center">
+            <Field
+              type="checkbox"
+              id="fan"
+              name="attachments"
+              value="fan"
+              checked={values.attachments?.includes("fan")}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                handleAttachmentChange(e.target.value, e.target.checked);
+              }}
+              className="mr-2"
+            />
+            <label htmlFor="fan" className="text-gray-800 dark:text-white">Fan</label>
+          </div>
 
-            {/* Fan Cover */}
-            <div className="flex items-center">
-              <Field
-                type="checkbox"
-                id="fan_cover"
-                name="attachments"
-                value="fan cover"
-                checked={values.attachments?.includes("fan cover")} // Safely check if array includes value
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                  const { value, checked } = e.target;
-                  const updatedAttachments = checked
-                    ? [...(values.attachments || []), value]
-                    : (values.attachments || []).filter((item) => item !== value);
-                  setFieldValue("attachments", updatedAttachments);
-                }}
-                className="mr-2"
-              />
-              <label htmlFor="fan_cover" className="text-gray-800 dark:text-white">Fan Cover</label>
-            </div>
+          {/* Fan Cover */}
+          <div className="flex items-center">
+            <Field
+              type="checkbox"
+              id="fan_cover"
+              name="attachments"
+              value="fan cover"
+              checked={values.attachments?.includes("fan cover")}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                handleAttachmentChange(e.target.value, e.target.checked);
+              }}
+              className="mr-2"
+            />
+            <label htmlFor="fan_cover" className="text-gray-800 dark:text-white">Fan Cover</label>
+          </div>
 
-            {/* Terminal */}
-            <div className="flex items-center">
-              <Field
-                type="checkbox"
-                id="terminal"
-                name="attachments"
-                value="terminal"
-                checked={values.attachments?.includes("terminal")} // Safely check if array includes value
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                  const { value, checked } = e.target;
-                  const updatedAttachments = checked
-                    ? [...(values.attachments || []), value]
-                    : (values.attachments || []).filter((item) => item !== value);
-                  setFieldValue("attachments", updatedAttachments);
-                }}
-                className="mr-2"
-              />
-              <label htmlFor="terminal" className="text-gray-800 dark:text-white">Terminal</label>
-            </div>
+          {/* Terminal */}
+          <div className="flex items-center">
+            <Field
+              type="checkbox"
+              id="terminal"
+              name="attachments"
+              value="terminal"
+              checked={values.attachments?.includes("terminal")}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                handleAttachmentChange(e.target.value, e.target.checked);
+              }}
+              className="mr-2"
+            />
+            <label htmlFor="terminal" className="text-gray-800 dark:text-white">Terminal</label>
+          </div>
 
-            {/* Terminal Box */}
-            <div className="flex items-center">
-              <Field
-                type="checkbox"
-                id="terminal_box"
-                name="attachments"
-                value="terminal box"
-                checked={values.attachments?.includes("terminal box")} // Safely check if array includes value
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                  const { value, checked } = e.target;
-                  const updatedAttachments = checked
-                    ? [...(values.attachments || []), value]
-                    : (values.attachments || []).filter((item) => item !== value);
-                  setFieldValue("attachments", updatedAttachments);
-                }}
-                className="mr-2"
-              />
-              <label htmlFor="terminal_box" className="text-gray-800 dark:text-white">Terminal Box</label>
-            </div>
+          {/* Terminal Box */}
+          <div className="flex items-center">
+            <Field
+              type="checkbox"
+              id="terminal_box"
+              name="attachments"
+              value="terminal box"
+              checked={values.attachments?.includes("terminal box")}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                handleAttachmentChange(e.target.value, e.target.checked);
+              }}
+              className="mr-2"
+            />
+            <label htmlFor="terminal_box" className="text-gray-800 dark:text-white">Terminal Box</label>
+          </div>
+
+          {/* Pulli */}
+          <div className="flex items-center">
+            <Field
+              type="checkbox"
+              id="pulli"
+              name="attachments"
+              value="pulli"
+              checked={values.attachments?.includes("pulli")}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                handleAttachmentChange(e.target.value, e.target.checked);
+              }}
+              className="mr-2"
+            />
+            <label htmlFor="pulli" className="text-gray-800 dark:text-white">Pulli</label>
+          </div>
+
+          {/* AVR */}
+          <div className="flex items-center">
+            <Field
+              type="checkbox"
+              id="avr"
+              name="attachments"
+              value="AVR"
+              checked={values.attachments?.includes("AVR")}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                handleAttachmentChange(e.target.value, e.target.checked);
+              }}
+              className="mr-2"
+            />
+            <label htmlFor="avr" className="text-gray-800 dark:text-white">AVR</label>
+          </div>
+
+          {/* Diode */}
+          <div className="flex items-center">
+            <Field
+              type="checkbox"
+              id="diode"
+              name="attachments"
+              value="diode"
+              checked={values.attachments?.includes("diode")}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                handleAttachmentChange(e.target.value, e.target.checked);
+              }}
+              className="mr-2"
+            />
+            <label htmlFor="diode" className="text-gray-800 dark:text-white">Diode</label>
+          </div>
+
+          {/* Grill */}
+          <div className="flex items-center">
+            <Field
+              type="checkbox"
+              id="grill"
+              name="attachments"
+              value="grill"
+              checked={values.attachments?.includes("grill")}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                handleAttachmentChange(e.target.value, e.target.checked);
+              }}
+              className="mr-2"
+            />
+            <label htmlFor="grill" className="text-gray-800 dark:text-white">Grill</label>
           </div>
         </div>
       </FormItem>

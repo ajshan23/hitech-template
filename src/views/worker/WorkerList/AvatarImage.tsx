@@ -1,19 +1,27 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Avatar from '@/components/ui/Avatar';
 import Upload from '@/components/ui/Upload';
 import { HiOutlinePlus } from 'react-icons/hi';
 
 interface AvatarImageProps {
   onFileUpload: (files: File[]) => void;
+  initialImage?: string;
 }
 
-const AvatarImage = ({ onFileUpload }: AvatarImageProps) => {
+const AvatarImage = ({ onFileUpload, initialImage }: AvatarImageProps) => {
   const [avatarImg, setAvatarImg] = useState<string | null>(null);
+
+  // Update avatarImg when initialImage changes
+  useEffect(() => {
+    if (initialImage) {
+      setAvatarImg(initialImage);
+    }
+  }, [initialImage]);
 
   const handleFileUpload = (files: File[]) => {
     if (files.length > 0) {
-      setAvatarImg(URL.createObjectURL(files[0])); // Set the image preview
-      onFileUpload(files); // Pass the uploaded files to the parent component
+      setAvatarImg(URL.createObjectURL(files[0]));
+      onFileUpload(files);
     }
   };
 
@@ -41,7 +49,7 @@ const AvatarImage = ({ onFileUpload }: AvatarImageProps) => {
         beforeUpload={beforeUpload}
         onChange={handleFileUpload}
       >
-        <Avatar size={80} src={avatarImg as string} icon={<HiOutlinePlus />} />
+        <Avatar size={80} src={avatarImg || ''} icon={<HiOutlinePlus />} />
       </Upload>
     </div>
   );

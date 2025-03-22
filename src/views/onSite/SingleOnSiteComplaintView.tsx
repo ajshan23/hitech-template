@@ -11,8 +11,8 @@ import { FaUser, FaCalendarAlt, FaPhone, FaMapMarkerAlt, FaTools, FaUserCircle }
 import { MdOutlineDone } from "react-icons/md";
 import isEmpty from "lodash/isEmpty";
 import dayjs from "dayjs";
+import { BASE_URL } from "@/constants/app.constant";
 
-const apiBaseUrl = "https://mytest.hitechengineeringcompany.in/api";
 
 interface Worker {
   _id: string;
@@ -55,7 +55,7 @@ const SingleOnSiteComplaintView = () => {
     }
     setLoading(true);
     try {
-      const response = await axios.get(`${apiBaseUrl}/onsite/${id}`);
+      const response = await axios.get(`${BASE_URL}/onsite/${id}`);
       if (response.data.success) {
         setData(response.data.data);
       } else {
