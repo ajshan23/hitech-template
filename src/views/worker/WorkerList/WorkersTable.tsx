@@ -3,8 +3,9 @@ import axios from 'axios';
 import DataTable from '@/components/shared/DataTable';
 import Badge from '@/components/ui/Badge';
 import type { ColumnDef, DataTableResetHandle } from '@/components/shared/DataTable';
-import { HiCheck, HiX } from 'react-icons/hi'; // Icons for the toggle button
+import { HiCheck, HiX, HiPencil } from 'react-icons/hi'; // Added HiPencil for Edit icon
 import { BASE_URL } from '@/constants/app.constant';
+import { useNavigate } from 'react-router-dom'; // Import useNavigate from React Router
 
 interface Worker {
   _id: string;
@@ -33,6 +34,7 @@ const WorkersTable = ({
   const [pageIndex, setPageIndex] = useState<number>(1);
   const [pageSize, setPageSize] = useState<number>(10);
   const [total, setTotal] = useState<number>(0);
+  const navigate = useNavigate(); // Initialize useNavigate
 
   useEffect(() => {
     setPageIndex(1);
@@ -63,24 +65,24 @@ const WorkersTable = ({
 
   const toggleWorkerStatus = async (workerId: string, currentStatus: boolean) => {
     try {
-      // Make API call to toggle status
       const response = await axios.put(
         `${BASE_URL}/worker/change-status?id=${workerId}`
       );
-
-      // Update local state
       setWorkers((prevWorkers) =>
         prevWorkers.map((worker) =>
           worker._id === workerId
-            ? { ...worker, status: !currentStatus } // Toggle status locally
+            ? { ...worker, status: !currentStatus }
             : worker
         )
       );
-
       console.log('Status updated successfully:', response.data);
     } catch (error) {
       console.error('Error toggling worker status:', error);
     }
+  };
+
+  const handleEditWorker = (workerId: string) => {
+    navigate(`/app/worker/form/${workerId}`); // Navigate to the edit form route
   };
 
   const columns: ColumnDef<Worker>[] = useMemo(
@@ -112,7 +114,7 @@ const WorkersTable = ({
         accessorKey: 'status',
         cell: (props) => {
           const status = props.row.original.status;
-          const isActive = status; // No need to convert to boolean if it's already a boolean
+          const isActive = status;
           return (
             <div className="flex items-center gap-2">
               <Badge className={statusColorMap[String(isActive)]?.dotClass || 'bg-gray-500'} />
@@ -129,28 +131,33 @@ const WorkersTable = ({
         cell: (props) => {
           const isActive = props.row.original.status;
           return (
-            <div className="flex justify-end">
+            <div className="flex justify-end gap-2"> {/* Added gap for spacing */}
               <button
                 className={`flex items-center justify-center w-24 h-8 rounded-full transition-colors ${
                   isActive
-                    ? 'bg-red-500 hover:bg-red-600' // Red for deactivate
-                    : 'bg-emerald-500 hover:bg-emerald-600' // Green for activate
+                    ? 'bg-red-500 hover:bg-red-600'
+                    : 'bg-emerald-500 hover:bg-emerald-600'
                 }`}
                 onClick={() => toggleWorkerStatus(props.row.original._id, isActive)}
               >
                 <span className="flex items-center gap-1 text-white">
                   {isActive ? (
                     <>
-                     
                       <span>Deactivate</span>
                     </>
                   ) : (
                     <>
-                      
                       <span>Activate</span>
                     </>
                   )}
                 </span>
+              </button>
+              {/* Edit Button */}
+              <button
+                className="flex items-center justify-center w-8 h-8 rounded-full bg-blue-500 hover:bg-blue-600 transition-colors text-white"
+                onClick={() => handleEditWorker(props.row.original._id)}
+              >
+                <HiPencil size={16} />
               </button>
             </div>
           );
