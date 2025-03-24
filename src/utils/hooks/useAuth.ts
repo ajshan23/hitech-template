@@ -16,9 +16,7 @@ type Status = 'success' | 'failed'
 
 function useAuth() {
     const dispatch = useAppDispatch()
-
     const navigate = useNavigate()
-
     const query = useQuery()
 
     const { token, signedIn } = useAppSelector((state) => state.auth.session)
@@ -33,26 +31,34 @@ function useAuth() {
         | undefined
     > => {
         try {
-            // Simulate a successful login with a dummy user matching the mock server
-            const dummyUser = {
-                avatar: '/img/avatars/thumb-1.jpg', // Match the mock server avatar path
-                userName: 'Carolyn Perkins', // Match the mock server user name
-                authority: ['admin', 'user'], // Match the mock server authority (lowercase)
-                email: 'carolyn.p@elstar.com', // Match the mock server email
+            // Check if credentials match the allowed admin credentials
+            if (values.userName !== 'admin' || values.password !== 'hitech@Eng') {
+                return {
+                    status: 'failed',
+                    message: 'Invalid credentials',
+                }
             }
-    
-            const dummyToken = 'wVYrxaeNa9OxdnULvde1Au5m5w63' // Match the mock server token
-    
-            dispatch(signInSuccess(dummyToken))
-            dispatch(setUser(dummyUser))
-    
+
+            // Define admin user details
+            const adminUser = {
+                avatar: '/img/avatars/thumb-1.png',
+                userName: 'Hitech Admin',
+                authority: ['admin', 'user'],
+                email: 'admin@hitech.com',
+            }
+
+            const adminToken = 'wVYrxaeNa9OxdnULvde1Au5m5w63'
+
+            dispatch(signInSuccess(adminToken))
+            dispatch(setUser(adminUser))
+
             const redirectUrl = query.get(REDIRECT_URL_KEY)
             navigate(
                 redirectUrl
                     ? redirectUrl
                     : appConfig.authenticatedEntryPath,
             )
-    
+
             return {
                 status: 'success',
                 message: '',
@@ -66,40 +72,10 @@ function useAuth() {
     }
 
     const signUp = async (values: SignUpCredential) => {
-        try {
-            const resp = await apiSignUp(values)
-            if (resp.data) {
-                const { token } = resp.data
-                dispatch(signInSuccess(token))
-                if (resp.data.user) {
-                    dispatch(
-                        setUser(
-                            resp.data.user || {
-                                avatar: '',
-                                userName: 'Anonymous',
-                                authority: ['USER'],
-                                email: '',
-                            },
-                        ),
-                    )
-                }
-                const redirectUrl = query.get(REDIRECT_URL_KEY)
-                navigate(
-                    redirectUrl
-                        ? redirectUrl
-                        : appConfig.authenticatedEntryPath,
-                )
-                return {
-                    status: 'success',
-                    message: '',
-                }
-            }
-            // eslint-disable-next-line  @typescript-eslint/no-explicit-any
-        } catch (errors: any) {
-            return {
-                status: 'failed',
-                message: errors?.response?.data?.message || errors.toString(),
-            }
+        // Disable signup functionality
+        return {
+            status: 'failed',
+            message: 'Signup is disabled. Please use admin@hitech.com with password hitech@Eng to sign in',
         }
     }
 
