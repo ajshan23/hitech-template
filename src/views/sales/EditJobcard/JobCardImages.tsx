@@ -17,36 +17,36 @@ const JobCardImages = (props: JobCardImagesProps) => {
   const { values, setFieldValue } = props;
 
   const beforeUpload = (file: FileList | null) => {
-    if (!file || file.length === 0) {
-      return "Please upload a file!";
-    }
+    if (!file || file.length === 0) return "Please upload a file!";
 
     const uploadedFile = file[0];
     const isImage = uploadedFile.type.startsWith("image/");
     const isPDF = uploadedFile.type === "application/pdf";
 
-    if (!isImage && !isPDF) {
-      return "Please upload an image or PDF file!";
-    }
+    if (!isImage && !isPDF) return "Please upload an image or PDF file!";
 
     const isLt2MB = uploadedFile.size / 1024 / 1024 <= 2;
-    if (!isLt2MB) {
-      return "File size must be less than 2MB!";
-    }
+    if (!isLt2MB) return "File size must be less than 2MB!";
 
     return true;
   };
 
-  const handleNewFileUpload = (files: File[], fileList: File[]) => {
-    console.log("New Files Added:", files); // Debugging: Log new files
-    setFieldValue("newFiles", files); // Update newFiles in form state
+  const handleNewFileUpload = (files: File[]) => {
+    setFieldValue("newFiles", files);
   };
 
   const handleRemoveFile = (fileId: string) => {
-    console.log("Removing File ID:", fileId); // Debugging: Log removed file ID
-    setFieldValue("removedImages", [...values.removedImages, fileId]); // Add to removedImages
+    if (!fileId || typeof fileId !== 'string') {
+      console.error("Invalid file ID:", fileId);
+      return;
+    }
+
+    if (values.images.some(img => img._id === fileId)) {
+      setFieldValue("removedImages", [...values.removedImages, fileId]);
+    }
+
     const updatedImages = values.images.filter((img) => img._id !== fileId);
-    setFieldValue("images", updatedImages); // Update images array
+    setFieldValue("images", updatedImages);
   };
 
   const renderFilePreview = (file: { _id: string; image: string; fileType?: string }) => {
@@ -114,14 +114,12 @@ const JobCardImages = (props: JobCardImagesProps) => {
         <Field name="images">
           {({ field, form }: FieldProps) => (
             <>
-              {/* Display existing files */}
               <div className="grid grid-cols-2 gap-4 mb-4">
                 {values.images.map((file) => (
                   <div key={file._id}>{renderFilePreview(file)}</div>
                 ))}
               </div>
 
-              {/* Upload new files */}
               <Upload
                 draggable
                 beforeUpload={beforeUpload}
@@ -140,12 +138,6 @@ const JobCardImages = (props: JobCardImagesProps) => {
                   </p>
                 </div>
               </Upload>
-
-              <input
-                type="hidden"
-                name="removedImages"
-                value={JSON.stringify(values.removedImages)}
-              />
             </>
           )}
         </Field>

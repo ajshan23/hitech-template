@@ -15,7 +15,7 @@ import { BASE_URL } from "@/constants/app.constant";
 type JobCardFormValues = {
   customerName: string;
   customerAddress: string;
-  phoneNumber: string[]; // Updated to match backend response
+  phoneNumber: string[];
   Make: string;
   HP?: number;
   KVA?: number;
@@ -35,32 +35,6 @@ type JobCardFormValues = {
   invoiceNumber: string;
   removedImages: string[];
   newFiles: File[];
-};
-
-type JobCardResponse = {
-  data: {
-    customerName: string;
-    customerAddress: string;
-    phoneNumber: string[]; // Updated to match backend response
-    Make: string;
-    HP?: number;
-    KVA?: number;
-    RPM?: number;
-    Type: string;
-    Frame: string;
-    SrNo: string;
-    DealerName: string;
-    DealerNumber: string;
-    works: string;
-    spares: string;
-    industrialworks: string;
-    attachments: string[];
-    warranty: boolean;
-    others: string;
-    images: Array<{ _id: string; image: string; fileType?: string }>;
-    invoiceNumber: string;
-    jobCardStatus: string;
-  };
 };
 
 const validationSchema = Yup.object().shape({
@@ -96,7 +70,7 @@ const EditJobCardForm = () => {
   const [initialValues, setInitialValues] = useState<JobCardFormValues>({
     customerName: "",
     customerAddress: "",
-    phoneNumber: [""], // Updated to match backend response
+    phoneNumber: [""],
     Make: "",
     HP: undefined,
     KVA: undefined,
@@ -119,11 +93,10 @@ const EditJobCardForm = () => {
   });
   const [isBilled, setIsBilled] = useState(false);
 
-  // Fetch job card data
   useEffect(() => {
     const fetchJobCard = async () => {
       try {
-        const response = await axios.get<JobCardResponse>(`${BASE_URL}/jobcards/${id}`);
+        const response = await axios.get(`${BASE_URL}/jobcards/${id}`);
         const jobCard = response.data.data;
 
         setIsBilled(jobCard.jobCardStatus === "Billed");
@@ -131,7 +104,7 @@ const EditJobCardForm = () => {
         setInitialValues({
           customerName: jobCard.customerName,
           customerAddress: jobCard.customerAddress,
-          phoneNumber: jobCard.phoneNumber || [""], // Updated to match backend response
+          phoneNumber: jobCard.phoneNumber || [""],
           Make: jobCard.Make,
           HP: jobCard.HP,
           KVA: jobCard.KVA,
@@ -147,7 +120,7 @@ const EditJobCardForm = () => {
           attachments: jobCard.attachments || [],
           warranty: jobCard.warranty,
           others: jobCard.others,
-          images: jobCard.images.map((img) => ({
+          images: jobCard.images.map((img: any) => ({
             ...img,
             fileType: img.fileType || (img.image.toLowerCase().endsWith('.pdf') ? 'application/pdf' : 'image/jpeg'),
           })) || [],
@@ -165,9 +138,8 @@ const EditJobCardForm = () => {
         );
       }
     };
-    if (id) {
-      fetchJobCard();
-    }
+
+    if (id) fetchJobCard();
   }, [id]);
 
   const handleFormSubmit = async (values: JobCardFormValues, { setSubmitting }: { setSubmitting: (isSubmitting: boolean) => void }) => {
@@ -175,35 +147,32 @@ const EditJobCardForm = () => {
 
     const formData = new FormData();
 
-    // Append all fields to FormData
-    Object.keys(values).forEach((key) => {
-      const value = values[key as keyof JobCardFormValues];
-      
-      if (key === 'newFiles' && Array.isArray(value)) {
-        // Handle new file uploads
-        (value as File[]).forEach((file) => {
-          formData.append('files', file);
-        });
-      } else if (key === 'removedImages' && Array.isArray(value)) {
-        // Handle removed images
-        (value as string[]).forEach((imageId) => {
-          formData.append('removedImages', imageId);
-        });
-      } else if (key === 'attachments' && Array.isArray(value)) {
-        // Handle attachments
-        (value as string[]).forEach((attachment) => {
-          formData.append('attachments', attachment);
-        });
-      } else if (key === 'phoneNumber' && Array.isArray(value)) {
-        // Handle phone numbers
-        (value as string[]).forEach((phone, index) => {
-          formData.append(`phoneNumber[${index}]`, phone);
-        });
-      } else if (value !== undefined && value !== null) {
-        // Handle all other fields
-        formData.append(key, value.toString());
-      }
-    });
+    // Handle removedImages as JSON string
+    if (values.removedImages && values.removedImages.length > 0) {
+      formData.append('removedImages', JSON.stringify(values.removedImages));
+    }
+
+    // Handle new files
+    if (values.newFiles && values.newFiles.length > 0) {
+      values.newFiles.forEach((file) => {
+        formData.append('files', file);
+      });
+    }
+
+    // Handle other fields
+    const fieldsToExclude = ['newFiles', 'removedImages', 'images'];
+    Object.keys(values)
+      .filter(key => !fieldsToExclude.includes(key))
+      .forEach((key) => {
+        const value = values[key as keyof JobCardFormValues];
+        if (Array.isArray(value)) {
+          value.forEach((item, index) => {
+            formData.append(`${key}[${index}]`, item as any);
+          });
+        } else if (value !== undefined && value !== null) {
+          formData.append(key, value.toString());
+        }
+      });
 
     try {
       const response = await axios.put(
@@ -216,17 +185,12 @@ const EditJobCardForm = () => {
         }
       );
 
-      if (response.status !== 200) {
-        throw new Error("Failed to update job card");
-      }
-
       toast.push(
-        <Notification title="Job Card Updated" type="success" duration={2500}>
-          Job card updated successfully.
+        <Notification title="Success" type="success" duration={2500}>
+          Job card updated successfully
         </Notification>,
         { placement: "top-center" }
       );
-
       navigate(-1);
     } catch (error) {
       console.error("Error updating job card:", error);
@@ -249,7 +213,6 @@ const EditJobCardForm = () => {
       enableReinitialize
     >
       {({ values, touched, errors, isSubmitting, setFieldValue }) => {
-        // Only check for required fields: customerName, customerAddress, and phoneNumber
         const hasRequiredFieldErrors = errors.customerName || errors.customerAddress || errors.phoneNumber;
         if (hasRequiredFieldErrors && Object.keys(touched).length > 0) {
           window.scrollTo({ top: 0, behavior: 'smooth' });
