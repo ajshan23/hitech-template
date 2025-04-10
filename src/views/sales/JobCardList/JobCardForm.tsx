@@ -55,7 +55,7 @@ const validationSchema = Yup.object().shape({
     customerAddress: Yup.string().required('Customer Address is required'),
     phoneNumbers: Yup.array()
         .of(Yup.string().required('Phone Number is required'))
-        .min(1, 'At least one phone number is required'), // Ensure at least one phone number
+        .min(1, 'At least one phone number is required'),
     Make: Yup.string().required('Make is required'),
     HP: Yup.number().nullable(),
     KVA: Yup.number().nullable(),
@@ -77,11 +77,12 @@ const validationSchema = Yup.object().shape({
 const JobCardForm = forwardRef<FormikRef, JobCardFormProps>((props, ref) => {
     const { type, onDiscard } = props;
     const navigate = useNavigate();
+    const [hasSubmitted, setHasSubmitted] = useState(false);
 
     const initialValues: FormModel = {
         customerName: '',
         customerAddress: '',
-        phoneNumbers: [''], // Initialize with one empty phone number
+        phoneNumbers: [''],
         Make: '',
         HP: undefined,
         KVA: undefined,
@@ -102,6 +103,7 @@ const JobCardForm = forwardRef<FormikRef, JobCardFormProps>((props, ref) => {
 
     const handleFormSubmit = async (values: FormModel, { setSubmitting }: { setSubmitting: SetSubmitting }) => {
         setSubmitting(true);
+        setHasSubmitted(true);
     
         const formData = new FormData();
     
@@ -117,7 +119,6 @@ const JobCardForm = forwardRef<FormikRef, JobCardFormProps>((props, ref) => {
                     formData.append('files', file);
                 });
             } else if (key === 'phoneNumbers') {
-                // Convert comma-separated string to array of strings
                 const phoneNumbersArray = (typeof value === 'string' ? value.split(',') : Array.isArray(value) ? value : []) as string[];
                 if (phoneNumbersArray.length > 0) {
                     phoneNumbersArray.forEach((phone, index) => {
@@ -160,6 +161,7 @@ const JobCardForm = forwardRef<FormikRef, JobCardFormProps>((props, ref) => {
             setSubmitting(false);
         }
     };
+
     return (
         <>
             <Formik
@@ -169,10 +171,10 @@ const JobCardForm = forwardRef<FormikRef, JobCardFormProps>((props, ref) => {
                 onSubmit={handleFormSubmit}
             >
                 {({ values, touched, errors, isSubmitting }) => {
-                    // Check for required field errors and scroll to top
-                    const hasRequiredFieldErrors = errors.customerName || errors.customerAddress || errors.phoneNumbers || errors.Make;
-                    if (hasRequiredFieldErrors && Object.keys(touched).length > 0) {
+                    // Only scroll to top if form has been submitted and there are required field errors
+                    if (hasSubmitted && (errors.customerName || errors.customerAddress || errors.phoneNumbers || errors.Make)) {
                         window.scrollTo({ top: 0, behavior: 'smooth' });
+                        setHasSubmitted(false);
                     }
 
                     return (
